@@ -1,18 +1,19 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Header from "./components/Header";
-import Footer from "./components/Footer";
-import Home from "./pages/Home";
+import Header from "./Components/Header";
+import Footer from "./Components/Footer";
+import Home from "./Pages/Home";
 import DigitalProducts from "./pages/DigitalProducts";
 import About from "./pages/About";
-import Contact from "./pages/Contact";
-import AdminDashboard from "./pages/AdminDashboard";
+import Contact from "./Pages/Contact";
+import AdminDashboard from "./Pages/AdminDashboard";
 import StudentDashboard from "./pages/StudentDashboard";
-import Login from "./pages/Login";
+import Login from "./Pages/Login";
+import Signup from "./Pages/Signup";
 import { loadStripe } from "@stripe/stripe-js";
 import { Elements } from "@stripe/react-stripe-js";
 
 const stripePromise = loadStripe(
-  "pk_test_51SnpefEapbQZr5Ma5kf7OAnBsmvRMEfNyQhcegUUf3fsCp7aF2SCf0f9BoFnwBqHZ7xQKKEhEwIV8Y1rTc5ED5m6003zHvp6Dx"
+  "pk_test_51SnpefEapbQZr5Ma5kf7OAnBsmvRMEfNyQhcegUUf3fsCp7aF2SCf0f9BoFnwBqHZ7xQKKEhEwIV8Y1rTc5ED5m6003zHvp6Dx",
 ); // Replace with your key
 
 function App() {
@@ -30,6 +31,7 @@ function App() {
               <Route path="/admin" element={<AdminDashboard />} />
               <Route path="/dashboard" element={<StudentDashboard />} />
               <Route path="/login" element={<Login />} />
+              <Route path="/signup" element={<Signup />} />
               {/* Add success/cancel routes */}
             </Routes>
           </main>
