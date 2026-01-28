@@ -1,3 +1,7 @@
+/* Put external font imports FIRST */
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
+
+/* Then import Tailwind (v4+ syntax) */
 @import "tailwindcss";
 
 @layer base {
@@ -5,7 +9,7 @@
   }
 
   body {
+    font-family:
+      "Inter", system-ui, sans-serif; /* ← use it here or via tailwind.config */
   }
 }
-
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap");
