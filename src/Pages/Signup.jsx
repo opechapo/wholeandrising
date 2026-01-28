@@ -2,6 +2,7 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react";
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -10,6 +11,7 @@ const Signup = () => {
     role: "student",
   });
   const [errorMsg, setErrorMsg] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // new state
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -61,20 +63,28 @@ const Signup = () => {
           </div>
         )}
 
-        <div>
+        {/* Password with toggle */}
+        <div className="relative">
           <label className="block text-gray-700 font-medium mb-2">
             Password
           </label>
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="••••••••"
             value={formData.password}
             onChange={(e) =>
               setFormData({ ...formData, password: e.target.value })
             }
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 pr-12"
             required
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-10 text-gray-500 hover:text-gray-700 focus:outline-none"
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
         </div>
 
         <div>

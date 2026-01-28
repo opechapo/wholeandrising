@@ -2,18 +2,26 @@
 import { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { Eye, EyeOff } from "lucide-react"; // ← we'll use lucide icons (simple & lightweight)
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
+  const [role, setRole] = useState("student");
   const [errorMsg, setErrorMsg] = useState("");
+  const [showPassword, setShowPassword] = useState(false); // new state
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg("");
 
+    const payload = { password: formData.password };
+    if (role === "student") {
+      payload.email = formData.email;
+    }
+
     try {
-      const res = await axios.post("/api/auth/login", formData);
+      const res = await axios.post("/api/auth/login", payload);
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("role", res.data.role);
       navigate(res.data.role === "admin" ? "/admin" : "/dashboard");
@@ -41,33 +49,64 @@ const Login = () => {
         className="space-y-6 bg-white p-8 rounded-xl shadow-md"
       >
         <div>
-          <label className="block text-gray-700 font-medium mb-2">Email</label>
-          <input
-            type="email"
-            placeholder="your.email@example.com"
-            value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
+          <label className="block text-gray-700 font-medium mb-2">
+            Account Type
+          </label>
+          <select
+            value={role}
+            onChange={(e) => {
+              setRole(e.target.value);
+              if (e.target.value === "admin") {
+                setFormData((prev) => ({ ...prev, email: "" }));
+              }
+            }}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
-            required
-          />
+          >
+            <option value="student">Student</option>
+            <option value="admin">Admin</option>
+          </select>
         </div>
 
-        <div>
+        {role === "student" && (
+          <div>
+            <label className="block text-gray-700 font-medium mb-2">
+              Email
+            </label>
+            <input
+              type="email"
+              placeholder="your.email@example.com"
+              value={formData.email}
+              onChange={(e) =>
+                setFormData({ ...formData, email: e.target.value })
+              }
+              className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+              required
+            />
+          </div>
+        )}
+
+        {/* Password field with toggle */}
+        <div className="relative">
           <label className="block text-gray-700 font-medium mb-2">
             Password
           </label>
           <input
-            type="password"
+            type={showPassword ? "text" : "password"}
             placeholder="••••••••"
             value={formData.password}
             onChange={(e) =>
               setFormData({ ...formData, password: e.target.value })
             }
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 pr-12"
             required
           />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-10 text-gray-500 hover:text-gray-700 focus:outline-none"
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
         </div>
 
         <button
