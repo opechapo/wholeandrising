@@ -6,7 +6,7 @@ import DigitalProducts from "./pages/DigitalProducts";
 import About from "./pages/About";
 import Contact from "./Pages/Contact";
 import AdminDashboard from "./Pages/AdminDashboard";
-import StudentDashboard from "./pages/StudentDashboard";
+import StudentDashboard from "./Pages/StudentDashboard";
 import Login from "./Pages/Login";
 import Signup from "./Pages/Signup";
 import { loadStripe } from "@stripe/stripe-js";
