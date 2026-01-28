@@ -97,7 +97,6 @@ const DigitalProducts = () => {
         </button>
       </div>
 
-      {/* Products Grid */}
       {filtered.length === 0 ? (
         <div className="text-center py-16 text-gray-500 text-xl">
           No products found in this category.
