@@ -1,3 +1,4 @@
+// src/Pages/StudentDashboard.jsx
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -7,6 +8,8 @@ const StudentDashboard = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  const BACKEND_URL = "https://wholeandrisingbacknd-7uns.onrender.com";
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -15,7 +18,7 @@ const StudentDashboard = () => {
     }
 
     axios
-      .get("/api/orders", {
+      .get(`${BACKEND_URL}/api/orders`, {
         headers: { Authorization: `Bearer ${token}` },
       })
       .then((res) => setOrders(res.data))
@@ -35,18 +38,6 @@ const StudentDashboard = () => {
       <h1 className="text-4xl font-bold text-gray-900 text-center mb-12">
         Student Dashboard
       </h1>
-      {/* <div className="flex justify-end mb-8">
-        <button
-          onClick={() => {
-            localStorage.removeItem("token");
-            localStorage.removeItem("role");
-            navigate("/login");
-          }}
-          className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-6 rounded-lg transition-colors"
-        >
-          Logout
-        </button>
-      </div> */}
 
       {error && (
         <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-6">
@@ -71,7 +62,7 @@ const StudentDashboard = () => {
                   {order.productId?.title || "Product"}
                 </h3>
                 <p className="text-gray-700 mt-2">
-                  Amount: £{order.amount.toFixed(2)}
+                  Amount: £{order.amount?.toFixed(2) || "0.00"}
                 </p>
                 {order.receiptUrl && (
                   <a
@@ -91,7 +82,6 @@ const StudentDashboard = () => {
 
       <section>
         <h2 className="text-2xl font-bold text-gray-800 mb-6">Your Progress</h2>
-        {/* Add progress bars here later */}
         <p className="text-gray-600">Progress tracking coming soon...</p>
       </section>
     </div>

@@ -1,3 +1,4 @@
+// src/Pages/DigitalProducts.jsx
 import { useEffect, useState } from "react";
 import axios from "axios";
 import ProductCard from "../Components/ProductCard";
@@ -15,13 +16,14 @@ const DigitalProducts = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  const BACKEND_URL = "https://wholeandrisingbacknd-7uns.onrender.com";
+
   useEffect(() => {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const res = await axios.get("/api/products");
+        const res = await axios.get(`${BACKEND_URL}/api/products`);
 
-        // Safeguard: make sure we always get an array
         const data = Array.isArray(res.data)
           ? res.data
           : res.data?.products || [];
@@ -64,7 +66,6 @@ const DigitalProducts = () => {
         Digital Products
       </h1>
 
-      {/* Category Filters */}
       <div className="flex flex-wrap justify-center gap-4 mb-12">
         {Object.keys(categories).map((cat) => (
           <button
@@ -72,11 +73,7 @@ const DigitalProducts = () => {
             onClick={() => setCategory(cat)}
             className={`
               px-6 py-3 rounded-full font-medium transition-all
-              ${
-                category === cat
-                  ? "bg-green-600 text-white shadow-md"
-                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-              }
+              ${category === cat ? "bg-green-600 text-white shadow-md" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}
             `}
           >
             {categories[cat]}
@@ -86,11 +83,7 @@ const DigitalProducts = () => {
           onClick={() => setCategory("")}
           className={`
             px-6 py-3 rounded-full font-medium transition-all
-            ${
-              category === ""
-                ? "bg-green-600 text-white shadow-md"
-                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-            }
+            ${category === "" ? "bg-green-600 text-white shadow-md" : "bg-gray-100 text-gray-700 hover:bg-gray-200"}
           `}
         >
           All Products
