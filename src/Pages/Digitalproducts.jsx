@@ -1,4 +1,3 @@
-// src/Pages/DigitalProducts.jsx
 import { useEffect, useState } from "react";
 import axios from "axios";
 import ProductCard from "../Components/ProductCard";
@@ -10,13 +9,13 @@ const categories = {
   courses: "🎓 Courses",
 };
 
+const BACKEND_URL = "https://wholeandrisingbacknd-7uns.onrender.com";
+
 const DigitalProducts = () => {
   const [products, setProducts] = useState([]);
   const [category, setCategory] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const BACKEND_URL = "https://wholeandrisingbacknd-7uns.onrender.com";
 
   useEffect(() => {
     const fetchProducts = async () => {

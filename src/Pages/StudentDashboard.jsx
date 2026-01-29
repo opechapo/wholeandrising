@@ -1,14 +1,13 @@
-// src/Pages/StudentDashboard.jsx
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+
+const BACKEND_URL = "https://wholeandrisingbacknd-7uns.onrender.com";
 
 const StudentDashboard = () => {
   const [orders, setOrders] = useState([]);
   const [error, setError] = useState(null);
   const navigate = useNavigate();
-
-  const BACKEND_URL = "https://wholeandrisingbacknd-7uns.onrender.com";
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -23,7 +22,7 @@ const StudentDashboard = () => {
       })
       .then((res) => setOrders(res.data))
       .catch((err) => {
-        console.error(err);
+        console.error("Orders failed:", err);
         if (err.response?.status === 401) {
           localStorage.removeItem("token");
           navigate("/login");

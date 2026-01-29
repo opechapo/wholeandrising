@@ -1,11 +1,10 @@
-// src/pages/AdminDashboard.jsx
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-// import ReactQuill from "react-quill";
-// import "react-quill/dist/quill.snow.css";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
+
+const BACKEND_URL = "https://wholeandrisingbacknd-7uns.onrender.com";
 
 const AdminDashboard = () => {
   const [products, setProducts] = useState([]);
@@ -14,7 +13,6 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Form states
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -32,7 +30,6 @@ const AdminDashboard = () => {
   const [newLessonName, setNewLessonName] = useState("");
   const [newLessonContent, setNewLessonContent] = useState("");
 
-  // Editing mode
   const [editingProduct, setEditingProduct] = useState(null);
 
   const navigate = useNavigate();
@@ -52,9 +49,12 @@ const AdminDashboard = () => {
       setLoading(true);
       setError(null);
 
-      const productsPromise = axios.get("/api/products", config);
-      const ordersPromise = axios.get("/api/orders", config);
-      const analyticsPromise = axios.get("/api/orders/analytics", config);
+      const productsPromise = axios.get(`${BACKEND_URL}/api/products`, config);
+      const ordersPromise = axios.get(`${BACKEND_URL}/api/orders`, config);
+      const analyticsPromise = axios.get(
+        `${BACKEND_URL}/api/orders/analytics`,
+        config,
+      );
 
       const [productsRes, ordersRes, analyticsRes] = await Promise.all([
         productsPromise.catch((err) => {
@@ -76,7 +76,6 @@ const AdminDashboard = () => {
       setAnalytics(analyticsRes.data);
     } catch (err) {
       console.error("Dashboard fetch error:", err);
-      // optional: show more specific message
       if (err.response) {
         setError(
           `Server error (${err.response.status}) on ${err.config?.url || "unknown endpoint"}`,
@@ -183,10 +182,14 @@ const AdminDashboard = () => {
 
     try {
       if (editingProduct) {
-        await axios.put(`/api/products/${editingProduct._id}`, data, config);
+        await axios.put(
+          `${BACKEND_URL}/api/products/${editingProduct._id}`,
+          data,
+          config,
+        );
         alert("Product updated successfully!");
       } else {
-        await axios.post("/api/products", data, config);
+        await axios.post(`${BACKEND_URL}/api/products`, data, config);
         alert("Product added successfully!");
       }
 
@@ -231,7 +234,7 @@ const AdminDashboard = () => {
     const config = { headers: { Authorization: `Bearer ${token}` } };
 
     try {
-      await axios.delete(`/api/products/${id}`, config);
+      await axios.delete(`${BACKEND_URL}/api/products/${id}`, config);
       alert("Product deleted successfully!");
       fetchData();
     } catch (err) {
@@ -271,7 +274,6 @@ const AdminDashboard = () => {
         Admin Dashboard
       </h1>
 
-      {/* Product Form */}
       <section className="max-w-4xl mx-auto bg-white p-8 md:p-10 rounded-2xl shadow-lg mb-16">
         <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
           {editingProduct
@@ -280,7 +282,6 @@ const AdminDashboard = () => {
         </h2>
 
         <form onSubmit={handleSubmit} className="space-y-8">
-          {/* Title */}
           <div>
             <label className="block text-gray-700 font-medium mb-2">
               Title *
@@ -296,7 +297,6 @@ const AdminDashboard = () => {
             />
           </div>
 
-          {/* Featured Image */}
           <div>
             <label className="block text-gray-700 font-medium mb-2">
               Featured Image (Thumbnail)
@@ -316,7 +316,7 @@ const AdminDashboard = () => {
               <div className="mt-2">
                 <p className="text-sm text-gray-600">Current thumbnail:</p>
                 <img
-                  src={`/uploads/${editingProduct.featuredImageUrl}`}
+                  src={`${BACKEND_URL}/uploads/${editingProduct.featuredImageUrl}`}
                   alt="Current thumbnail"
                   className="mt-2 max-w-xs rounded shadow"
                 />
@@ -324,7 +324,6 @@ const AdminDashboard = () => {
             )}
           </div>
 
-          {/* Pricing Model + Price */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <label className="block text-gray-700 font-medium mb-2">
@@ -365,7 +364,6 @@ const AdminDashboard = () => {
             </div>
           </div>
 
-          {/* Description */}
           <div>
             <label className="block text-gray-700 font-medium mb-2">
               Description *
@@ -381,7 +379,6 @@ const AdminDashboard = () => {
             />
           </div>
 
-          {/* Category */}
           <div>
             <label className="block text-gray-700 font-medium mb-2">
               Category *
@@ -405,7 +402,6 @@ const AdminDashboard = () => {
             </select>
           </div>
 
-          {/* File Upload – optional */}
           <div>
             <label className="block text-gray-700 font-medium mb-2">
               Upload Digital Product directly (optional – PDF, ZIP, etc.)
@@ -421,7 +417,7 @@ const AdminDashboard = () => {
               <div className="mt-2">
                 <p className="text-sm text-gray-600">Current file attached:</p>
                 <a
-                  href={`/${editingProduct.fileUrl}`}
+                  href={`${BACKEND_URL}/uploads/${editingProduct.fileUrl}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-green-600 hover:underline"
@@ -432,13 +428,11 @@ const AdminDashboard = () => {
             )}
           </div>
 
-          {/* Curriculum */}
           <div className="border-t pt-8">
             <h3 className="text-2xl font-bold text-gray-800 mb-6">
               Curriculum (Upload File Manually)
             </h3>
 
-            {/* Add Topic */}
             <div className="mb-8 p-6 bg-gray-50 rounded-xl">
               <h4 className="text-xl font-semibold mb-4">Add New Topic</h4>
               <input
@@ -464,7 +458,6 @@ const AdminDashboard = () => {
               </button>
             </div>
 
-            {/* Topics List */}
             {curriculum.length > 0 && (
               <div className="mb-8">
                 <h4 className="text-xl font-semibold mb-4">Topics</h4>
@@ -487,7 +480,6 @@ const AdminDashboard = () => {
               </div>
             )}
 
-            {/* Lesson Form for Selected Topic */}
             {currentTopicIndex !== -1 && (
               <div className="p-6 bg-gray-50 rounded-xl">
                 <h4 className="text-xl font-semibold mb-4">
@@ -541,7 +533,6 @@ const AdminDashboard = () => {
             )}
           </div>
 
-          {/* Submit */}
           <div className="pt-6">
             <button
               type="submit"
@@ -561,7 +552,6 @@ const AdminDashboard = () => {
             )}
           </div>
 
-          {/* Overview – rich text */}
           <div>
             <label className="block text-gray-700 font-medium mb-2">
               Overview (attract & inform students)
@@ -576,7 +566,6 @@ const AdminDashboard = () => {
         </form>
       </section>
 
-      {/* Products List */}
       <section className="mb-16">
         <h2 className="text-3xl font-bold text-gray-900 mb-8">
           Your Digital Products
@@ -595,7 +584,7 @@ const AdminDashboard = () => {
               >
                 {product.featuredImageUrl && (
                   <img
-                    src={`/uploads/${product.featuredImageUrl}`}
+                    src={`${BACKEND_URL}/uploads/${product.featuredImageUrl}`}
                     alt={product.title}
                     className="w-full h-48 object-cover rounded-t-lg mb-4"
                   />
@@ -635,7 +624,6 @@ const AdminDashboard = () => {
         )}
       </section>
 
-      {/* Quick Stats */}
       <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16">
         <div className="bg-white p-8 rounded-2xl shadow-lg border border-gray-100">
           <h3 className="text-xl font-bold text-gray-800 mb-4">Total Orders</h3>
@@ -654,7 +642,6 @@ const AdminDashboard = () => {
         </div>
       </section>
 
-      {/* Recent Orders */}
       <section>
         <h2 className="text-3xl font-bold text-gray-900 mb-8">Recent Orders</h2>
 
