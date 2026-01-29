@@ -2,7 +2,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-import api from "../Utils/api";
+import api from "../utils/api";
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
