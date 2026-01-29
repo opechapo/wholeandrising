@@ -13,6 +13,7 @@ const AdminDashboard = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // Form states
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -30,6 +31,7 @@ const AdminDashboard = () => {
   const [newLessonName, setNewLessonName] = useState("");
   const [newLessonContent, setNewLessonContent] = useState("");
 
+  // Editing mode
   const [editingProduct, setEditingProduct] = useState(null);
 
   const navigate = useNavigate();
