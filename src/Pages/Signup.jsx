@@ -1,8 +1,17 @@
+// src/Pages/Signup.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
-// import api from "../utils/api";
-import api from "../utils/api";
+import axios from "axios";
+
+const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
+
+const api = axios.create({
+  baseURL: API_BASE,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});
 
 const Signup = () => {
   const [formData, setFormData] = useState({
