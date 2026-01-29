@@ -4,21 +4,14 @@ import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
 import axios from "axios";
 
-const API_BASE = import.meta.env.VITE_API_BASE || "http://localhost:5000";
-
-const api = axios.create({
-  baseURL: API_BASE,
-  headers: {
-    "Content-Type": "application/json",
-  },
-});
-
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [role, setRole] = useState("student");
   const [errorMsg, setErrorMsg] = useState("");
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
+
+  const BACKEND_URL = "https://wholeandrisingbacknd-7uns.onrender.com";
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -30,7 +23,10 @@ const Login = () => {
     }
 
     try {
-      const res = await api.post("/api/auth/login", payload);
+      const res = await axios.post(`${BACKEND_URL}/api/auth/login`, payload, {
+        headers: { "Content-Type": "application/json" },
+      });
+
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("role", res.data.role);
       navigate(res.data.role === "admin" ? "/admin" : "/dashboard");
