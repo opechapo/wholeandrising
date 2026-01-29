@@ -1,14 +1,14 @@
 // src/pages/Login.jsx
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { Eye, EyeOff } from "lucide-react"; // ← we'll use lucide icons (simple & lightweight)
+import { Eye, EyeOff } from "lucide-react";
+import api from "../utils/api"; // ← new import
 
 const Login = () => {
   const [formData, setFormData] = useState({ email: "", password: "" });
   const [role, setRole] = useState("student");
   const [errorMsg, setErrorMsg] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // new state
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -21,7 +21,7 @@ const Login = () => {
     }
 
     try {
-      const res = await axios.post("/api/auth/login", payload);
+      const res = await api.post("/api/auth/login", payload);
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("role", res.data.role);
       navigate(res.data.role === "admin" ? "/admin" : "/dashboard");
@@ -29,6 +29,7 @@ const Login = () => {
       const msg =
         err.response?.data?.msg || "Invalid credentials or server error";
       setErrorMsg(msg);
+      console.error("Login failed:", err);
     }
   };
 
@@ -85,7 +86,6 @@ const Login = () => {
           </div>
         )}
 
-        {/* Password field with toggle */}
         <div className="relative">
           <label className="block text-gray-700 font-medium mb-2">
             Password

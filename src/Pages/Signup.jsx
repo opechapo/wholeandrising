@@ -1,8 +1,8 @@
 // src/pages/Signup.jsx
 import { useState } from "react";
-import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
+import api from "../utils/api"; // ← new import
 
 const Signup = () => {
   const [formData, setFormData] = useState({
@@ -11,7 +11,7 @@ const Signup = () => {
     role: "student",
   });
   const [errorMsg, setErrorMsg] = useState("");
-  const [showPassword, setShowPassword] = useState(false); // new state
+  const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
@@ -19,13 +19,14 @@ const Signup = () => {
     setErrorMsg("");
 
     try {
-      const res = await axios.post("/api/auth/signup", formData);
+      const res = await api.post("/api/auth/signup", formData);
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("role", res.data.role);
       navigate(res.data.role === "admin" ? "/admin" : "/dashboard");
     } catch (err) {
       const msg = err.response?.data?.msg || "Something went wrong. Try again.";
       setErrorMsg(msg);
+      console.error("Signup failed:", err);
     }
   };
 
@@ -63,7 +64,6 @@ const Signup = () => {
           </div>
         )}
 
-        {/* Password with toggle */}
         <div className="relative">
           <label className="block text-gray-700 font-medium mb-2">
             Password
