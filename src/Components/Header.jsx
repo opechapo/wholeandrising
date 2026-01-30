@@ -42,14 +42,14 @@ const Header = () => {
         </Link>
 
         <ul className="flex items-center space-x-6 md:space-x-10">
-          <li>
+          {/* <li>
             <Link
               to="/"
               className="text-gray-700 hover:text-green-600 transition-colors"
             >
               Home
             </Link>
-          </li>
+          </li> */}
           <li>
             <Link
               to="/digital-products"

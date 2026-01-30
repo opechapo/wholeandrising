@@ -41,24 +41,23 @@ const ProductCard = ({ product }) => {
         transition-all duration-400 cursor-pointer
         group relative
         hover:shadow-2xl hover:scale-[1.03]
-        w-full max-w-md md:max-w-lg lg:max-w-xl   /* wider card */
+        w-full max-w-md md:max-w-lg lg:max-w-xl
       `}
       onClick={toggleExpand}
     >
-      {/* Featured Image – much larger */}
+      {/* Featured Image – direct ImageKit URL with optimization */}
       <div className="relative">
         {product.featuredImageUrl ? (
           <img
-            src={`/uploads/${product.featuredImageUrl}`}
+            src={`${product.featuredImageUrl}?tr=w-600,h-900,q-80,f-webp`}
             alt={product.title}
             className="
-              w-full h-96 md:h-[28rem] lg:h-[32rem]    /* significantly taller */
+              w-full h-96 md:h-[28rem] lg:h-[32rem]
               object-cover transition-transform duration-700
               group-hover:scale-105
             "
             onError={(e) => {
-              e.target.src =
-                "https://via.placeholder.com/600x900?text=No+Image";
+              e.target.src = "https://placehold.co/600x900?text=No+Image";
               e.target.alt = "Image not available";
             }}
           />
@@ -68,7 +67,6 @@ const ProductCard = ({ product }) => {
           </div>
         )}
 
-        {/* Title overlay – larger text */}
         <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/75 to-transparent p-6 md:p-8">
           <h3 className="text-2xl md:text-3xl font-bold text-white drop-shadow-lg">
             {product.title}
@@ -76,7 +74,6 @@ const ProductCard = ({ product }) => {
         </div>
       </div>
 
-      {/* Details section – shown on hover or click */}
       <div
         className={`
           px-6 md:px-8 pb-8 md:pb-10 pt-6 flex flex-col flex-grow
@@ -86,19 +83,16 @@ const ProductCard = ({ product }) => {
           md:max-h-0 md:opacity-0
         `}
       >
-        {/* Description – larger text */}
         <p className="text-gray-700 mb-6 text-base md:text-lg line-clamp-5">
           {product.description}
         </p>
 
-        {/* Price – much bigger */}
         <p className="text-green-600 text-3xl md:text-4xl font-extrabold mb-8">
           {product.pricingModel === "free"
             ? "Free"
             : `£${product.price?.toFixed(2) || "0.00"}`}
         </p>
 
-        {/* Email input – larger */}
         <input
           type="email"
           placeholder="Your email for receipt & access"
@@ -113,7 +107,6 @@ const ProductCard = ({ product }) => {
           required
         />
 
-        {/* Buy Button – larger */}
         <button
           onClick={(e) => {
             e.stopPropagation();
@@ -132,7 +125,6 @@ const ProductCard = ({ product }) => {
         </button>
       </div>
 
-      {/* Mobile hint */}
       <div className="md:hidden text-center text-sm text-gray-500 py-3 bg-gray-50">
         Tap card to {isExpanded ? "hide" : "show"} details
       </div>

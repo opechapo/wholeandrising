@@ -276,6 +276,7 @@ const AdminDashboard = () => {
         Admin Dashboard
       </h1>
 
+      {/* Product Form */}
       <section className="max-w-4xl mx-auto bg-white p-8 md:p-10 rounded-2xl shadow-lg mb-16">
         <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
           {editingProduct
@@ -318,7 +319,7 @@ const AdminDashboard = () => {
               <div className="mt-2">
                 <p className="text-sm text-gray-600">Current thumbnail:</p>
                 <img
-                  src={`${BACKEND_URL}/uploads/${editingProduct.featuredImageUrl}`}
+                  src={`${editingProduct.featuredImageUrl}?tr=w-300,h-300,q-85,f-webp`}
                   alt="Current thumbnail"
                   className="mt-2 max-w-xs rounded shadow"
                 />
@@ -419,7 +420,7 @@ const AdminDashboard = () => {
               <div className="mt-2">
                 <p className="text-sm text-gray-600">Current file attached:</p>
                 <a
-                  href={`${BACKEND_URL}/uploads/${editingProduct.fileUrl}`}
+                  href={editingProduct.fileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-green-600 hover:underline"
@@ -568,6 +569,7 @@ const AdminDashboard = () => {
         </form>
       </section>
 
+      {/* Products List */}
       <section className="mb-16">
         <h2 className="text-3xl font-bold text-gray-900 mb-8">
           Your Digital Products
@@ -584,12 +586,16 @@ const AdminDashboard = () => {
                 key={product._id}
                 className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-xl transition-all duration-300"
               >
-                {product.featuredImageUrl && (
+                {product.featuredImageUrl ? (
                   <img
-                    src={`${BACKEND_URL}/uploads/${product.featuredImageUrl}`}
+                    src={`${product.featuredImageUrl}?tr=w-600,h-900,q-80,f-webp`}
                     alt={product.title}
                     className="w-full h-48 object-cover rounded-t-lg mb-4"
                   />
+                ) : (
+                  <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500 rounded-t-lg mb-4">
+                    No image
+                  </div>
                 )}
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
                   {product.title}
@@ -644,6 +650,7 @@ const AdminDashboard = () => {
         </div>
       </section>
 
+      {/* Recent Orders */}
       <section>
         <h2 className="text-3xl font-bold text-gray-900 mb-8">Recent Orders</h2>
 
