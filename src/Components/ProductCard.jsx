@@ -1,34 +1,36 @@
 import { useState } from "react";
 import axios from "axios";
-import { useStripe, useElements } from "@stripe/react-stripe-js";
+import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
+
+const BACKEND_URL = "https://wholeandrisingbacknd-7uns.onrender.com";
 
 const ProductCard = ({ product }) => {
+  const [{ isPending }] = usePayPalScriptReducer();
   const [email, setEmail] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
-  const stripe = useStripe();
-  const elements = useElements();
+  const [paymentStatus, setPaymentStatus] = useState(null);
 
-  const handleBuy = async () => {
-    if (!stripe || !email.trim()) {
-      alert("Please enter your email");
-      return;
-    }
+  const handleFreeAccess = async () => {
+    if (!email.trim()) return alert("Please enter your email");
 
     try {
-      const { data } = await axios.post("/api/payments/create-session", {
-        productId: product._id,
-        email,
-      });
+      const res = await axios.post(
+        `${BACKEND_URL}/api/payments/create-order`,
+        { productId: product._id },
+        {
+          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+        },
+      );
 
-      const result = await stripe.redirectToCheckout({ sessionId: data.id });
-
-      if (result.error) {
-        console.error("Stripe redirect error:", result.error.message);
-        alert(result.error.message);
+      if (
+        res.data.status === "free" ||
+        res.data.status === "already_accessed"
+      ) {
+        alert("Access granted! Check your dashboard.");
+        setPaymentStatus("success");
       }
     } catch (err) {
-      console.error("Payment initiation failed:", err);
-      alert(err.response?.data?.msg || "Something went wrong. Try again.");
+      alert(err.response?.data?.msg || "Error processing free product");
     }
   };
 
@@ -45,7 +47,6 @@ const ProductCard = ({ product }) => {
       `}
       onClick={toggleExpand}
     >
-      {/* Featured Image – direct ImageKit URL with optimization */}
       <div className="relative">
         {product.featuredImageUrl ? (
           <img
@@ -107,22 +108,91 @@ const ProductCard = ({ product }) => {
           required
         />
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            handleBuy();
-          }}
-          disabled={!stripe || !email.trim()}
-          className="
-            mt-auto bg-green-600 text-white py-4 px-8 rounded-xl
-            text-lg md:text-xl font-semibold
-            hover:bg-green-700 transition-colors
-            disabled:opacity-50 disabled:cursor-not-allowed
-            shadow-md hover:shadow-lg
-          "
-        >
-          Buy Now
-        </button>
+        {product.pricingModel === "free" ? (
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              handleFreeAccess();
+            }}
+            disabled={!email.trim()}
+            className="
+              mt-auto bg-green-600 text-white py-4 px-8 rounded-xl
+              text-lg md:text-xl font-semibold
+              hover:bg-green-700 transition-colors
+              disabled:opacity-50 disabled:cursor-not-allowed
+              shadow-md hover:shadow-lg
+            "
+          >
+            Get Free Access
+          </button>
+        ) : (
+          <div className="mt-auto">
+            {isPending ? (
+              <p className="text-center text-gray-600">Loading PayPal...</p>
+            ) : paymentStatus === "success" ? (
+              <p className="text-center text-green-600 font-bold">
+                Purchase Complete!
+              </p>
+            ) : (
+              <PayPalButtons
+                style={{
+                  layout: "vertical",
+                  color: "gold",
+                  shape: "rect",
+                  label: "paypal",
+                }}
+                createOrder={(data, actions) => {
+                  return fetch(`${BACKEND_URL}/api/payments/create-order`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                    body: JSON.stringify({ productId: product._id }),
+                  })
+                    .then((res) => res.json())
+                    .then((orderData) => {
+                      if (orderData.status === "free") return null; // handled separately
+                      return orderData.id;
+                    })
+                    .catch((err) => {
+                      console.error("Create order failed", err);
+                      alert("Could not start payment");
+                    });
+                }}
+                onApprove={(data, actions) => {
+                  return fetch(`${BACKEND_URL}/api/payments/capture-order`, {
+                    method: "POST",
+                    headers: {
+                      "Content-Type": "application/json",
+                      Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    },
+                    body: JSON.stringify({
+                      orderID: data.orderID,
+                      productId: product._id,
+                    }),
+                  })
+                    .then((res) => res.json())
+                    .then((orderData) => {
+                      setPaymentStatus("success");
+                      alert(
+                        "Payment successful! Check your dashboard for download.",
+                      );
+                    })
+                    .catch((err) => {
+                      console.error("Capture failed", err);
+                      alert("Payment failed – please try again");
+                    });
+                }}
+                onCancel={() => alert("Payment cancelled")}
+                onError={(err) => {
+                  console.error("PayPal error:", err);
+                  alert("An error occurred with PayPal");
+                }}
+              />
+            )}
+          </div>
+        )}
       </div>
 
       <div className="md:hidden text-center text-sm text-gray-500 py-3 bg-gray-50">

@@ -48,6 +48,7 @@ const StudentDashboard = () => {
         <h2 className="text-2xl font-bold text-gray-800 mb-6">
           Your Purchases
         </h2>
+
         {orders.length === 0 ? (
           <p className="text-gray-600 text-center">No purchases yet.</p>
         ) : (
@@ -60,19 +61,71 @@ const StudentDashboard = () => {
                 <h3 className="text-xl font-bold text-gray-900">
                   {order.productId?.title || "Product"}
                 </h3>
-                <p className="text-gray-700 mt-2">
-                  Amount: £{order.amount?.toFixed(2) || "0.00"}
-                </p>
-                {order.receiptUrl && (
-                  <a
-                    href={order.receiptUrl}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="mt-3 inline-block text-green-600 hover:text-green-800 font-medium"
-                  >
-                    Download Receipt
-                  </a>
-                )}
+
+                <div className="mt-2 space-y-2 text-gray-700">
+                  <p>
+                    <span className="font-medium">Amount:</span>{" "}
+                    {order.amount === 0
+                      ? "Free"
+                      : `£${order.amount?.toFixed(2) || "0.00"}`}
+                  </p>
+
+                  <p>
+                    <span className="font-medium">Status:</span>{" "}
+                    <span
+                      className={`font-medium ${
+                        order.status === "paid"
+                          ? "text-green-600"
+                          : "text-yellow-600"
+                      }`}
+                    >
+                      {order.status.charAt(0).toUpperCase() +
+                        order.status.slice(1)}
+                    </span>
+                  </p>
+
+                  <p>
+                    <span className="font-medium">Purchased:</span>{" "}
+                    {new Date(order.createdAt).toLocaleDateString()}
+                  </p>
+
+                  {/* Download Access */}
+                  {order.downloadAccess && order.productId?.fileUrl && (
+                    <div className="mt-4">
+                      <a
+                        href={order.productId.fileUrl}
+                        download
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-block bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-6 rounded-lg transition-colors"
+                      >
+                        Download Product
+                      </a>
+                    </div>
+                  )}
+
+                  {/* PayPal Receipt */}
+                  {order.receiptUrl && (
+                    <div className="mt-3">
+                      <a
+                        href={order.receiptUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-green-600 hover:text-green-800 font-medium underline"
+                      >
+                        View PayPal Receipt →
+                      </a>
+                    </div>
+                  )}
+
+                  {/* Free item note */}
+                  {order.amount === 0 && !order.productId?.fileUrl && (
+                    <p className="mt-3 text-gray-500 italic">
+                      Free access granted — check your email or contact support
+                      if file is missing.
+                    </p>
+                  )}
+                </div>
               </div>
             ))}
           </div>

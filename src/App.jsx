@@ -1,24 +1,25 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { PayPalScriptProvider } from "@paypal/react-paypal-js"; // ← ADD THIS
 import Header from "./Components/Header";
 import Footer from "./Components/Footer";
 import Home from "./Pages/Home";
-import DigitalProducts from "./Pages/Digitalproducts";
+import DigitalProducts from "./Pages/DigitalProducts";
 import About from "./Pages/About";
 import Contact from "./Pages/Contact";
 import AdminDashboard from "./Pages/AdminDashboard";
 import StudentDashboard from "./Pages/StudentDashboard";
 import Login from "./Pages/Login";
 import Signup from "./Pages/Signup";
-import { loadStripe } from "@stripe/stripe-js";
-import { Elements } from "@stripe/react-stripe-js";
-
-const stripePromise = loadStripe(
-  "pk_test_51SnpefEapbQZr5Ma5kf7OAnBsmvRMEfNyQhcegUUf3fsCp7aF2SCf0f9BoFnwBqHZ7xQKKEhEwIV8Y1rTc5ED5m6003zHvp6Dx",
-); // Replace with your key
 
 function App() {
   return (
-    <Elements stripe={stripePromise}>
+    <PayPalScriptProvider
+      options={{
+        "client-id": "YOUR_PAYPAL_CLIENT_ID_HERE", // ← replace with your sandbox/live client ID
+        currency: "GBP",
+        intent: "capture",
+      }}
+    >
       <Router>
         <div className="flex flex-col min-h-screen">
           <Header />
@@ -32,13 +33,13 @@ function App() {
               <Route path="/dashboard" element={<StudentDashboard />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
-              {/* Add success/cancel routes */}
+              {/* Add payment success/cancel pages later if needed */}
             </Routes>
           </main>
           <Footer />
         </div>
       </Router>
-    </Elements>
+    </PayPalScriptProvider>
   );
 }
 

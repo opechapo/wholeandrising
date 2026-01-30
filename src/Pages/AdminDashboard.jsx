@@ -650,9 +650,11 @@ const AdminDashboard = () => {
         </div>
       </section>
 
-      {/* Recent Orders */}
+      {/* Recent Orders – Enhanced for PayPal */}
       <section>
-        <h2 className="text-3xl font-bold text-gray-900 mb-8">Recent Orders</h2>
+        <h2 className="text-3xl font-bold text-gray-900 mb-8">
+          Recent Orders (All Users)
+        </h2>
 
         {orders.length === 0 ? (
           <div className="bg-white p-10 rounded-2xl shadow-md text-center text-gray-600">
@@ -666,12 +668,19 @@ const AdminDashboard = () => {
                 className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow"
               >
                 <h3 className="text-xl font-bold text-gray-900 mb-3">
-                  {order.productId?.title || "Product"}
+                  {order.productId?.title || "Unknown Product"}
                 </h3>
+
                 <div className="space-y-2 text-gray-700">
                   <p>
-                    <span className="font-medium">Amount:</span> £
-                    {order.amount?.toFixed(2)}
+                    <span className="font-medium">Buyer Email:</span>{" "}
+                    {order.userEmail || "N/A"}
+                  </p>
+                  <p>
+                    <span className="font-medium">Amount:</span>{" "}
+                    {order.amount === 0
+                      ? "Free"
+                      : `£${order.amount?.toFixed(2)}`}
                   </p>
                   <p>
                     <span className="font-medium">Status:</span>{" "}
@@ -682,16 +691,24 @@ const AdminDashboard = () => {
                           : "text-yellow-600"
                       }`}
                     >
-                      {order.status}
+                      {order.status.charAt(0).toUpperCase() +
+                        order.status.slice(1)}
                     </span>
                   </p>
                   <p>
                     <span className="font-medium">Purchased:</span>{" "}
-                    {new Date(order.createdAt).toLocaleDateString()}
+                    {new Date(order.createdAt).toLocaleString()}
                   </p>
-                  {order.userEmail && (
-                    <p>
-                      <span className="font-medium">By:</span> {order.userEmail}
+
+                  {/* PayPal-specific info */}
+                  {order.paypalOrderId && (
+                    <p className="text-sm text-gray-500">
+                      PayPal Order ID: <code>{order.paypalOrderId}</code>
+                    </p>
+                  )}
+                  {order.paypalCaptureId && (
+                    <p className="text-sm text-gray-500">
+                      PayPal Capture ID: <code>{order.paypalCaptureId}</code>
                     </p>
                   )}
                   {order.receiptUrl && (
@@ -701,7 +718,7 @@ const AdminDashboard = () => {
                       rel="noopener noreferrer"
                       className="mt-3 inline-block text-green-600 hover:text-green-800 font-medium"
                     >
-                      View Receipt →
+                      View PayPal Receipt →
                     </a>
                   )}
                 </div>
