@@ -10,6 +10,7 @@ import AdminDashboard from "./Pages/AdminDashboard";
 import StudentDashboard from "./Pages/StudentDashboard";
 import Login from "./Pages/Login";
 import Signup from "./Pages/Signup";
+import PaymentSuccess from "./Pages/PaymentSuccess";
 
 function App() {
   return (
@@ -33,6 +34,7 @@ function App() {
               <Route path="/dashboard" element={<StudentDashboard />} />
               <Route path="/login" element={<Login />} />
               <Route path="/signup" element={<Signup />} />
+              <Route path="/payment/success" element={<PaymentSuccess />} />
               {/* Add payment success/cancel pages later if needed */}
             </Routes>
           </main>

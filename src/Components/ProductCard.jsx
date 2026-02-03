@@ -8,17 +8,23 @@ const ProductCard = ({ product }) => {
   const [{ isPending }] = usePayPalScriptReducer();
   const [email, setEmail] = useState("");
   const [isExpanded, setIsExpanded] = useState(false);
-  const [paymentStatus, setPaymentStatus] = useState(null);
+  const [paymentStatus, setPaymentStatus] = useState(null); // "success" | "error"
 
   const handleFreeAccess = async () => {
-    if (!email.trim()) return alert("Please enter your email");
+    if (!email.trim()) {
+      alert("Please enter your email");
+      return;
+    }
 
     try {
       const res = await axios.post(
         `${BACKEND_URL}/api/payments/create-order`,
         { productId: product._id },
         {
-          headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+            "Content-Type": "application/json",
+          },
         },
       );
 
@@ -26,11 +32,13 @@ const ProductCard = ({ product }) => {
         res.data.status === "free" ||
         res.data.status === "already_accessed"
       ) {
-        alert("Access granted! Check your dashboard.");
+        alert("Access granted! Check your dashboard for download.");
         setPaymentStatus("success");
       }
     } catch (err) {
+      console.error("Free access error:", err);
       alert(err.response?.data?.msg || "Error processing free product");
+      setPaymentStatus("error");
     }
   };
 
@@ -47,6 +55,7 @@ const ProductCard = ({ product }) => {
       `}
       onClick={toggleExpand}
     >
+      {/* Featured Image */}
       <div className="relative">
         {product.featuredImageUrl ? (
           <img
@@ -75,6 +84,7 @@ const ProductCard = ({ product }) => {
         </div>
       </div>
 
+      {/* Details & Payment Section */}
       <div
         className={`
           px-6 md:px-8 pb-8 md:pb-10 pt-6 flex flex-col flex-grow
@@ -130,8 +140,12 @@ const ProductCard = ({ product }) => {
             {isPending ? (
               <p className="text-center text-gray-600">Loading PayPal...</p>
             ) : paymentStatus === "success" ? (
-              <p className="text-center text-green-600 font-bold">
-                Purchase Complete!
+              <p className="text-center text-green-600 font-bold text-lg">
+                Purchase Complete! Check your dashboard.
+              </p>
+            ) : paymentStatus === "error" ? (
+              <p className="text-center text-red-600 font-medium">
+                Something went wrong — please try again
               </p>
             ) : (
               <PayPalButtons
@@ -141,52 +155,64 @@ const ProductCard = ({ product }) => {
                   shape: "rect",
                   label: "paypal",
                 }}
-                createOrder={(data, actions) => {
-                  return fetch(`${BACKEND_URL}/api/payments/create-order`, {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                      Authorization: `Bearer ${localStorage.getItem("token")}`,
-                    },
-                    body: JSON.stringify({ productId: product._id }),
-                  })
-                    .then((res) => res.json())
-                    .then((orderData) => {
-                      if (orderData.status === "free") return null; // handled separately
-                      return orderData.id;
-                    })
-                    .catch((err) => {
-                      console.error("Create order failed", err);
-                      alert("Could not start payment");
-                    });
-                }}
-                onApprove={(data, actions) => {
-                  return fetch(`${BACKEND_URL}/api/payments/capture-order`, {
-                    method: "POST",
-                    headers: {
-                      "Content-Type": "application/json",
-                      Authorization: `Bearer ${localStorage.getItem("token")}`,
-                    },
-                    body: JSON.stringify({
-                      orderID: data.orderID,
-                      productId: product._id,
-                    }),
-                  })
-                    .then((res) => res.json())
-                    .then((orderData) => {
+                createOrder={async (data, actions) => {
+                  try {
+                    const res = await axios.post(
+                      `${BACKEND_URL}/api/payments/create-order`,
+                      { productId: product._id },
+                      {
+                        headers: {
+                          Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+                          "Content-Type": "application/json",
+                        },
+                      },
+                    );
+
+                    if (res.data.status === "free") {
+                      alert("Free product! Check dashboard.");
                       setPaymentStatus("success");
-                      alert(
-                        "Payment successful! Check your dashboard for download.",
-                      );
-                    })
-                    .catch((err) => {
-                      console.error("Capture failed", err);
-                      alert("Payment failed – please try again");
-                    });
+                      return null;
+                    }
+
+                    return res.data.id;
+                  } catch (err) {
+                    console.error("Create order failed:", err);
+                    alert("Could not start PayPal payment");
+                    throw err;
+                  }
                 }}
-                onCancel={() => alert("Payment cancelled")}
+                onApprove={async (data, actions) => {
+                  try {
+                    const res = await axios.post(
+                      `${BACKEND_URL}/api/payments/capture-order`,
+                      {
+                        orderID: data.orderID,
+                        productId: product._id,
+                      },
+                      {
+                        headers: {
+                          Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+                          "Content-Type": "application/json",
+                        },
+                      },
+                    );
+
+                    setPaymentStatus("success");
+                    alert(
+                      "Payment successful! Check your dashboard for download.",
+                    );
+                  } catch (err) {
+                    console.error("Capture failed:", err);
+                    setPaymentStatus("error");
+                    alert("Payment capture failed — please contact support");
+                  }
+                }}
+                onCancel={() => {
+                  alert("Payment cancelled");
+                }}
                 onError={(err) => {
                   console.error("PayPal error:", err);
+                  setPaymentStatus("error");
                   alert("An error occurred with PayPal");
                 }}
               />
