@@ -16,7 +16,8 @@ function App() {
   return (
     <PayPalScriptProvider
       options={{
-        "client-id": "YOUR_PAYPAL_CLIENT_ID_HERE", // ← replace with your sandbox/live client ID
+        "client-id":
+          "Acan1RAWRS575zv2a1IBxbrOiTlkToyxc235eiQum6fuQnigE5DnkgwAcaq-NiCBALPayJXc89XWFY0v",
         currency: "GBP",
         intent: "capture",
       }}
