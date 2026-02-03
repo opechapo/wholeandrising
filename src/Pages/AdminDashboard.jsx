@@ -700,7 +700,6 @@ const AdminDashboard = () => {
                     {new Date(order.createdAt).toLocaleString()}
                   </p>
 
-                  {/* PayPal-specific info */}
                   {order.paypalOrderId && (
                     <p className="text-sm text-gray-500">
                       PayPal Order ID: <code>{order.paypalOrderId}</code>
