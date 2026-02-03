@@ -1,9 +1,9 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import { PayPalScriptProvider } from "@paypal/react-paypal-js"; // ← ADD THIS
+import { PayPalScriptProvider } from "@paypal/react-paypal-js";
 import Header from "./Components/Header";
 import Footer from "./Components/Footer";
 import Home from "./Pages/Home";
-import DigitalProducts from "./Pages/DigitalProducts";
+import DigitalProducts from "./Pages/Digitalproducts";
 import About from "./Pages/About";
 import Contact from "./Pages/Contact";
 import AdminDashboard from "./Pages/AdminDashboard";
