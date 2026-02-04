@@ -19,7 +19,7 @@ const PaymentSuccess = () => {
     }
 
     // Optional: You can fetch order details using PayPal orderID from query param
-    const paypalOrderId = searchParams.get("token"); // PayPal redirects with ?token=xxx
+    const paypalOrderId = searchParams.get("token");
 
     if (paypalOrderId) {
       // You could call your backend to verify / get order details
