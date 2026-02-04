@@ -11,8 +11,6 @@ const Header = () => {
     const token = localStorage.getItem("token");
     if (token) {
       setIsLoggedIn(true);
-      // Optional: decode role from token or fetch from backend
-      // For simplicity, we can store role in localStorage after login
       const storedRole = localStorage.getItem("role");
       setRole(storedRole);
     } else {
@@ -20,14 +18,6 @@ const Header = () => {
       setRole(null);
     }
   }, []);
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    localStorage.removeItem("role");
-    setIsLoggedIn(false);
-    setRole(null);
-    navigate("/login");
-  };
 
   const dashboardLink = role === "admin" ? "/admin" : "/dashboard";
 
@@ -42,14 +32,6 @@ const Header = () => {
         </Link>
 
         <ul className="flex items-center space-x-6 md:space-x-10">
-          {/* <li>
-            <Link
-              to="/"
-              className="text-gray-700 hover:text-green-600 transition-colors"
-            >
-              Home
-            </Link>
-          </li> */}
           <li>
             <Link
               to="/digital-products"
@@ -75,23 +57,14 @@ const Header = () => {
             </Link>
           </li>
 
-          {/* Dynamic auth link */}
           <li>
             {isLoggedIn ? (
-              <div className="flex items-center space-x-4">
-                <Link
-                  to={dashboardLink}
-                  className="text-green-600 hover:text-green-800 font-medium transition-colors"
-                >
-                  Dashboard
-                </Link>
-                <button
-                  onClick={handleLogout}
-                  className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-5 rounded-lg transition-colors"
-                >
-                  Logout
-                </button>
-              </div>
+              <Link
+                to={dashboardLink}
+                className="text-green-600 hover:text-green-800 font-medium transition-colors"
+              >
+                Dashboard
+              </Link>
             ) : (
               <Link
                 to="/login"

@@ -20,6 +20,9 @@ function App() {
           "Acan1RAWRS575zv2a1IBxbrOiTlkToyxc235eiQum6fuQnigE5DnkgwAcaq-NiCBALPayJXc89XWFY0v",
         currency: "GBP",
         intent: "capture",
+        locale: "en_GB",
+        components: "buttons",
+        "enable-funding": "paylater,venmo",
       }}
     >
       <Router>
