@@ -47,7 +47,7 @@ const ProductCard = ({ product }) => {
   return (
     <div
       className={`
-        bg-white rounded-2xl shadow-lg overflow-hidden flex flex-col
+        bg-white rounded-2xl shadow-lg overflow-visible flex flex-col
         transition-all duration-400 cursor-pointer
         group relative
         hover:shadow-2xl hover:scale-[1.03]

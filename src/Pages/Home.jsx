@@ -1,74 +1,181 @@
+import React from "react";
+
+// Import your images here (generate them using the prompts above)
+import heroBg from "../assets/images/hero-wellness-bg.png";
+import growthImg from "../assets/images/growth-flatlay.png";
+import avatarSarah from "../assets/images/avatar-sarah.png";
+import avatarJames from "../assets/images/avatar-james.png";
+import avatarAisha from "../assets/images/avatar-aisha.png";
+
 const Home = () => {
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="min-h-screen bg-gradient-to-b from-[#fdfaf5] to-[#f5f5f4]">
       {/* Hero Section */}
-      <section className="text-center py-16 md:py-20 bg-gray-50 rounded-2xl">
-        <h1 className="text-4xl md:text-5xl font-bold text-gray-900 tracking-tight">
-          Welcome to Whole and Rising
-        </h1>
-        <p className="mt-6 text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
-          Empowering you with tools for personal growth, authentic connection,
-          and holistic wellness.
+      <section
+        className="relative min-h-[70vh] md:min-h-[80vh] flex items-center justify-center bg-cover bg-center text-center px-6"
+        style={{
+          backgroundImage: `url(${heroBg})`,
+        }}
+      >
+        <div className="relative z-10 max-w-4xl mx-auto">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight drop-shadow-lg">
+            Welcome to Whole and Rising
+          </h1>
+          <p className="mt-6 text-xl md:text-2xl text-white/95 max-w-3xl mx-auto font-light drop-shadow-md">
+            Digital tools and gentle guidance for personal growth, authentic
+            connection, family wellness, and intentional living.
+          </p>
+          <a
+            href="/digital-products"
+            className="
+              mt-10 inline-block
+              bg-emerald-600 hover:bg-emerald-700
+              text-white font-semibold
+              py-4 px-12 rounded-full
+              shadow-xl hover:shadow-2xl
+              transition-all duration-300 transform hover:-translate-y-1
+              text-lg md:text-xl
+            "
+          >
+            Start Your Journey
+          </a>
+        </div>
+      </section>
+
+      {/* What You'll Gain */}
+      <section className="py-16 md:py-24 px-6">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center text-emerald-800 mb-12">
+            What You’ll Gain
+          </h2>
+
+          <div className="grid md:grid-cols-2 gap-10 items-center">
+            <div>
+              <ul className="space-y-6 text-lg md:text-xl text-gray-700">
+                <li className="flex items-start">
+                  <span className="text-emerald-600 text-2xl mr-4">✓</span>
+                  Build unshakable confidence and authentic self-expression
+                </li>
+                <li className="flex items-start">
+                  <span className="text-emerald-600 text-2xl mr-4">✓</span>
+                  Create healthy, joyful habits for the whole family
+                </li>
+                <li className="flex items-start">
+                  <span className="text-emerald-600 text-2xl mr-4">✓</span>
+                  Make intentional choices that align with your values
+                </li>
+                <li className="flex items-start">
+                  <span className="text-emerald-600 text-2xl mr-4">✓</span>
+                  Release limiting beliefs and emotional blocks
+                </li>
+                <li className="flex items-start">
+                  <span className="text-emerald-600 text-2xl mr-4">✓</span>
+                  Live a life rooted in connection, clarity, and purpose
+                </li>
+              </ul>
+            </div>
+
+            <div className="hidden md:block">
+              <img
+                src={growthImg}
+                alt="Wellness flatlay - journal, nature elements, calm aesthetic"
+                className="rounded-2xl shadow-2xl object-cover h-full w-full"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonials Section */}
+      <section className="py-16 md:py-24 bg-gradient-to-br from-emerald-50 to-teal-50 px-6">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center text-emerald-800 mb-16">
+            What People Are Saying
+          </h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-emerald-100">
+              <div className="flex items-center mb-6">
+                <img
+                  src={avatarSarah}
+                  alt="Sarah M."
+                  className="w-16 h-16 rounded-full object-cover mr-4 border-2 border-emerald-200"
+                />
+                <div>
+                  <p className="font-semibold text-gray-900">Sarah M.</p>
+                  <p className="text-sm text-gray-500">
+                    Working Mom & Growth Enthusiast
+                  </p>
+                </div>
+              </div>
+              <p className="text-gray-700 italic leading-relaxed">
+                "These gentle tools helped me reclaim my energy and create
+                sacred family moments again."
+              </p>
+            </div>
+
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-emerald-100">
+              <div className="flex items-center mb-6">
+                <img
+                  src={avatarJames}
+                  alt="James K."
+                  className="w-16 h-16 rounded-full object-cover mr-4 border-2 border-emerald-200"
+                />
+                <div>
+                  <p className="font-semibold text-gray-900">James K.</p>
+                  <p className="text-sm text-gray-500">
+                    Career Transition Coach
+                  </p>
+                </div>
+              </div>
+              <p className="text-gray-700 italic leading-relaxed">
+                "A real digital sanctuary — helped me unpack old beliefs and
+                realign with purpose."
+              </p>
+            </div>
+
+            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-emerald-100">
+              <div className="flex items-center mb-6">
+                <img
+                  src={avatarAisha}
+                  alt="Kim R."
+                  className="w-16 h-16 rounded-full object-cover mr-4 border-2 border-emerald-200"
+                />
+                <div>
+                  <p className="font-semibold text-gray-900">Kim R.</p>
+                  <p className="text-sm text-gray-500">
+                    Wellness Advocate & Yoga Instructor
+                  </p>
+                </div>
+              </div>
+              <p className="text-gray-700 italic leading-relaxed">
+                "Deepened my home practice and brought emotional connection back
+                to center."
+              </p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Final CTA */}
+      <section className="py-20 text-center bg-emerald-800 text-white px-6">
+        <h2 className="text-3xl md:text-4xl font-bold mb-6">
+          Ready to Begin Your Becoming?
+        </h2>
+        <p className="text-xl md:text-2xl max-w-3xl mx-auto mb-10 opacity-90">
+          Join others who are choosing intention, growth, and wholeness one
+          small, powerful step at a time.
         </p>
         <a
           href="/digital-products"
           className="
-            mt-10 inline-block
-            bg-green-600 hover:bg-green-700
-            text-white font-medium
-            py-4 px-10 rounded-lg
-            shadow-md hover:shadow-lg
-            transition-all duration-300
-            text-lg
+            inline-block bg-white text-emerald-800 font-bold
+            py-5 px-14 rounded-full text-xl
+            hover:bg-emerald-50 transition-colors shadow-xl
           "
         >
-          Browse Digital Products
+          Browse All Products
         </a>
-      </section>
-
-      {/* What You'll Gain */}
-      <section className="py-16">
-        <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-10">
-          What You’ll Gain
-        </h2>
-        <ul className="list-disc list-inside mx-auto max-w-3xl text-lg text-gray-700 space-y-4">
-          <li>Build deeper confidence and self-trust</li>
-          <li>Improve communication and relationships</li>
-          <li>Release limiting beliefs and emotional blocks</li>
-          <li>Develop tools for authentic living and growth</li>
-          <li>Feel more aligned, empowered, and whole</li>
-        </ul>
-      </section>
-
-      {/* Testimonials Section */}
-      <section className="py-16 bg-white rounded-2xl shadow-sm">
-        <h2 className="text-3xl md:text-4xl font-bold text-center text-gray-800 mb-12">
-          What People Are Saying
-        </h2>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 px-4 md:px-12">
-          <div className="bg-gray-50 p-8 rounded-xl border border-gray-100 hover:shadow-md transition-shadow">
-            <p className="text-gray-700 italic mb-6">
-              "These tools completely transformed how I connect with myself and
-              others."
-            </p>
-            <p className="font-medium text-gray-900">— Sarah M.</p>
-          </div>
-
-          <div className="bg-gray-50 p-8 rounded-xl border border-gray-100 hover:shadow-md transition-shadow">
-            <p className="text-gray-700 italic mb-6">
-              "Finally, practical resources that actually work for real-life
-              healing."
-            </p>
-            <p className="font-medium text-gray-900">— James K.</p>
-          </div>
-
-          <div className="bg-gray-50 p-8 rounded-xl border border-gray-100 hover:shadow-md transition-shadow">
-            <p className="text-gray-700 italic mb-6">
-              "I feel more grounded and alive than I have in years. Thank you!"
-            </p>
-            <p className="font-medium text-gray-900">— Aisha R.</p>
-          </div>
-        </div>
       </section>
     </div>
   );

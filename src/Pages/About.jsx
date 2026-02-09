@@ -1,7 +1,7 @@
 import { Link } from "react-router-dom";
-import heroImage from "../images/about-hero.png";
-import authenticityImage from "../images/authenticity.png";
-import connectionImage from "../images/connection.png";
+import heroImage from "../assets/images/about-hero.png";
+import authenticityImage from "../assets/images/authenticity.png";
+import connectionImage from "../assets/images/connection.png";
 
 const About = () => {
   return (
@@ -168,7 +168,7 @@ const About = () => {
       </section>
 
       {/* Footer accent */}
-      <div className="h-24 bg-gradient-to-t from-green-900 to-transparent"></div>
+      {/* <div className="h-24 bg-gradient-to-t from-green-900 to-transparent"></div> */}
     </div>
   );
 };
