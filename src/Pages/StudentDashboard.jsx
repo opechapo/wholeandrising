@@ -1,4 +1,3 @@
-// StudentDashboard.jsx
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -10,6 +9,12 @@ const StudentDashboard = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  const handle401 = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    navigate("/login");
+  };
+
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -17,16 +22,18 @@ const StudentDashboard = () => {
       return;
     }
 
+    const config = {
+      headers: { Authorization: `Bearer ${token}` },
+    };
+
     axios
-      .get(`${BACKEND_URL}/api/orders`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
+      .get(`${BACKEND_URL}/api/orders`, config)
       .then((res) => setOrders(res.data))
       .catch((err) => {
         console.error("Orders failed:", err);
         if (err.response?.status === 401) {
-          localStorage.removeItem("token");
-          navigate("/login");
+          alert("Your session has expired. Please log in again.");
+          handle401();
         } else {
           setError("Failed to load your purchases");
         }
@@ -54,9 +61,8 @@ const StudentDashboard = () => {
           >
             My Purchases
           </button>
-          {/* You can add more items later, e.g. */}
+          {/* Future items */}
           {/* <button className="w-full text-left px-5 py-3 rounded-lg hover:bg-gray-800">Progress</button> */}
-          {/* <button className="w-full text-left px-5 py-3 rounded-lg hover:bg-gray-800">Settings</button> */}
         </nav>
 
         {/* Logout at bottom */}

@@ -6,16 +6,19 @@ import "react-quill-new/dist/quill.snow.css";
 
 const BACKEND_URL = "https://wholeandrisingbacknd-7uns.onrender.com";
 
+// Cache settings
+const CACHE_KEY = "admin_dashboard_cache_v1";
+const CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+
 const AdminDashboard = () => {
   const [activeSection, setActiveSection] = useState("add-product");
-
   const [products, setProducts] = useState([]);
   const [orders, setOrders] = useState([]);
   const [analytics, setAnalytics] = useState({});
-  const [loading, setLoading] = useState(true);
+  const [loadingProducts, setLoadingProducts] = useState(true);
+  const [loadingOrders, setLoadingOrders] = useState(true);
+  const [loadingAnalytics, setLoadingAnalytics] = useState(true);
   const [error, setError] = useState(null);
-
-  // Product form states
   const [formData, setFormData] = useState({
     title: "",
     description: "",
@@ -27,17 +30,13 @@ const AdminDashboard = () => {
   const [pricingModel, setPricingModel] = useState("paid");
   const [overview, setOverview] = useState("");
   const [curriculum, setCurriculum] = useState([]);
-
-  // Curriculum states (no lessons)
   const [newTopicTitle, setNewTopicTitle] = useState("");
   const [newTopicSummary, setNewTopicSummary] = useState("");
   const [newTopicContent, setNewTopicContent] = useState("");
   const [currentTopicIndex, setCurrentTopicIndex] = useState(-1);
   const [editingTopicContent, setEditingTopicContent] = useState("");
-
   const [editingProduct, setEditingProduct] = useState(null);
-
-  // Password change states
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [passwordForm, setPasswordForm] = useState({
     currentPassword: "",
     newPassword: "",
@@ -46,10 +45,30 @@ const AdminDashboard = () => {
   const [passwordMessage, setPasswordMessage] = useState(null);
   const [passwordError, setPasswordError] = useState(null);
   const [changingPassword, setChangingPassword] = useState(false);
-
   const navigate = useNavigate();
-
-  const fetchData = async () => {
+  const getCachedData = () => {
+    try {
+      const cached = localStorage.getItem(CACHE_KEY);
+      if (!cached) return null;
+      const { data, timestamp } = JSON.parse(cached);
+      if (Date.now() - timestamp > CACHE_TTL) {
+        localStorage.removeItem(CACHE_KEY);
+        return null;
+      }
+      return data;
+    } catch {
+      return null;
+    }
+  };
+  const setCachedData = (data) => {
+    try {
+      localStorage.setItem(
+        CACHE_KEY,
+        JSON.stringify({ data, timestamp: Date.now() }),
+      );
+    } catch {}
+  };
+  const fetchData = async (forceRefresh = false) => {
     const token = localStorage.getItem("token");
     if (!token) {
       navigate("/login");
@@ -60,32 +79,65 @@ const AdminDashboard = () => {
       headers: { Authorization: `Bearer ${token}` },
     };
 
+    // Use cache if available and not forced
+    if (!forceRefresh) {
+      const cached = getCachedData();
+      if (cached) {
+        setProducts(cached.products || []);
+        setOrders(cached.orders || []);
+        setAnalytics(cached.analytics || {});
+        setLoadingProducts(false);
+        setLoadingOrders(false);
+        setLoadingAnalytics(false);
+        return;
+      }
+    }
+
     try {
-      setLoading(true);
+      setLoadingProducts(true);
+      setLoadingOrders(true);
+      setLoadingAnalytics(true);
       setError(null);
 
-      const [productsRes, ordersRes, analyticsRes] = await Promise.all([
-        axios.get(`${BACKEND_URL}/api/products`, config),
-        axios.get(`${BACKEND_URL}/api/orders`, config),
-        axios.get(`${BACKEND_URL}/api/orders/analytics`, config),
-      ]);
+      const promises = [
+        axios
+          .get(`${BACKEND_URL}/api/products`, config)
+          .catch(() => ({ data: [] })),
+        axios
+          .get(`${BACKEND_URL}/api/orders`, config)
+          .catch(() => ({ data: [] })),
+        axios
+          .get(`${BACKEND_URL}/api/orders/analytics`, config)
+          .catch(() => ({ data: {} })),
+      ];
 
-      setProducts(productsRes.data);
-      setOrders(ordersRes.data);
-      setAnalytics(analyticsRes.data);
+      const [productsRes, ordersRes, analyticsRes] =
+        await Promise.all(promises);
+
+      const newData = {
+        products: productsRes.data,
+        orders: ordersRes.data,
+        analytics: analyticsRes.data,
+      };
+
+      setProducts(newData.products);
+      setOrders(newData.orders);
+      setAnalytics(newData.analytics);
+
+      // Cache fresh data
+      setCachedData(newData);
     } catch (err) {
       console.error("Dashboard fetch error:", err);
-      if (err.response) {
-        setError(
-          `Server error (${err.response.status}) on ${
-            err.config?.url || "unknown endpoint"
-          }`,
-        );
+      if (err.response?.status === 401) {
+        localStorage.removeItem("token");
+        navigate("/login");
       } else {
-        setError("Failed to load dashboard data. Please try again.");
+        setError("Failed to load some dashboard data. Please try again.");
       }
     } finally {
-      setLoading(false);
+      setLoadingProducts(false);
+      setLoadingOrders(false);
+      setLoadingAnalytics(false);
     }
   };
 
@@ -153,6 +205,8 @@ const AdminDashboard = () => {
       return;
     }
 
+    setIsSubmitting(true);
+
     const data = new FormData();
     data.append("title", formData.title);
     data.append("description", formData.description);
@@ -188,10 +242,12 @@ const AdminDashboard = () => {
       }
 
       resetForm();
-      fetchData();
+      // Force refresh after mutation
+      fetchData(true);
     } catch (err) {
       console.error("Product save error:", err);
       if (err.response?.status === 401) {
+        alert("Your session has expired. Please log in again.");
         localStorage.removeItem("token");
         navigate("/login");
       } else {
@@ -201,6 +257,8 @@ const AdminDashboard = () => {
             (err.response?.data?.msg || "Unknown error"),
         );
       }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -231,13 +289,20 @@ const AdminDashboard = () => {
     try {
       await axios.delete(`${BACKEND_URL}/api/products/${id}`, config);
       alert("Product deleted successfully!");
-      fetchData();
+      // Force refresh after delete
+      fetchData(true);
     } catch (err) {
       console.error("Delete error:", err);
-      alert(
-        "Error deleting product: " +
-          (err.response?.data?.msg || "Unknown error"),
-      );
+      if (err.response?.status === 401) {
+        alert("Your session has expired. Please log in again.");
+        localStorage.removeItem("token");
+        navigate("/login");
+      } else {
+        alert(
+          "Error deleting product: " +
+            (err.response?.data?.msg || "Unknown error"),
+        );
+      }
     }
   };
 
@@ -280,47 +345,45 @@ const AdminDashboard = () => {
       });
     } catch (err) {
       console.error("Password change failed:", err);
-      const msg =
-        err.response?.data?.msg || "Failed to change password. Try again.";
-      setPasswordError(msg);
-
       if (err.response?.status === 401) {
+        alert("Your session has expired. Please log in again.");
         localStorage.removeItem("token");
         navigate("/login");
+      } else {
+        const msg =
+          err.response?.data?.msg || "Failed to change password. Try again.";
+        setPasswordError(msg);
       }
     } finally {
       setChangingPassword(false);
     }
   };
+  const SkeletonCard = () => (
+    <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 animate-pulse">
+      <div className="w-full h-48 bg-gray-200 rounded-t-lg mb-4"></div>
+      <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+      <div className="h-4 bg-gray-200 rounded w-1/2 mb-1"></div>
+      <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+    </div>
+  );
 
-  if (loading) {
-    return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <p className="text-xl text-gray-600">Loading dashboard...</p>
+  const SkeletonOrder = () => (
+    <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 animate-pulse">
+      <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+      <div className="space-y-2">
+        <div className="h-4 bg-gray-200 rounded w-full"></div>
+        <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+        <div className="h-4 bg-gray-200 rounded w-4/6"></div>
       </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="container mx-auto px-4 py-16 text-center">
-        <p className="text-xl text-red-600">{error}</p>
-        <button
-          onClick={() => window.location.reload()}
-          className="mt-6 bg-green-600 hover:bg-green-700 text-white py-3 px-8 rounded-lg"
-        >
-          Retry
-        </button>
-      </div>
-    );
-  }
+    </div>
+  );
 
   return (
     <div className="flex min-h-screen bg-gray-50">
       {/* LEFT SIDEBAR */}
-      <aside className="w-64 bg-green-500 text-white flex flex-col h-screen fixed">
+      <aside className="w-64 bg-gray-900 text-white flex flex-col h-screen fixed">
         <div className="p-6 border-b border-gray-800">
-          {/* <h2 className="text-2xl font-bold text-green-400">Admin Panel</h2> */}
+          <h2 className="text-2xl font-bold text-green-400">Admin Panel</h2>
         </div>
 
         <nav className="flex-1 p-4 space-y-1">
@@ -344,12 +407,11 @@ const AdminDashboard = () => {
             </button>
           ))}
 
-          {/* Logout placed right after Change Password */}
           <div className="pt-6 mt-4 border-t border-gray-700">
             <button
               onClick={() => {
                 localStorage.removeItem("token");
-                localStorage.removeItem("role"); // optional if you store role
+                localStorage.removeItem("role");
                 navigate("/login");
               }}
               className="w-full bg-red-600 hover:bg-red-700 text-white font-medium py-3 px-5 rounded-lg transition-colors"
@@ -372,6 +434,7 @@ const AdminDashboard = () => {
             </h2>
 
             <form onSubmit={handleSubmit} className="space-y-8">
+              {/* Title */}
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
                   Title *
@@ -384,9 +447,11 @@ const AdminDashboard = () => {
                   }
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
+                  disabled={isSubmitting}
                 />
               </div>
 
+              {/* Featured Image */}
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
                   Featured Image (Thumbnail)
@@ -401,6 +466,7 @@ const AdminDashboard = () => {
                     })
                   }
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-6 file:rounded-lg file:border-0 file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer"
+                  disabled={isSubmitting}
                 />
                 {editingProduct?.featuredImageUrl &&
                   !formData.featuredImage && (
@@ -415,6 +481,7 @@ const AdminDashboard = () => {
                   )}
               </div>
 
+              {/* Pricing */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-gray-700 font-medium mb-2">
@@ -430,6 +497,7 @@ const AdminDashboard = () => {
                     }}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                     required
+                    disabled={isSubmitting}
                   >
                     <option value="paid">Paid</option>
                     <option value="free">Free</option>
@@ -448,13 +516,14 @@ const AdminDashboard = () => {
                     onChange={(e) =>
                       setFormData({ ...formData, price: e.target.value })
                     }
-                    disabled={pricingModel === "free"}
+                    disabled={pricingModel === "free" || isSubmitting}
                     className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 disabled:bg-gray-100"
                     required={pricingModel === "paid"}
                   />
                 </div>
               </div>
 
+              {/* Description */}
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
                   Description *
@@ -467,9 +536,11 @@ const AdminDashboard = () => {
                   rows={5}
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
+                  disabled={isSubmitting}
                 />
               </div>
 
+              {/* Category */}
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
                   Category *
@@ -481,6 +552,7 @@ const AdminDashboard = () => {
                   }
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
+                  disabled={isSubmitting}
                 >
                   <option value="ebooks">📘 E-Books & Guides</option>
                   <option value="workbooks">
@@ -493,7 +565,8 @@ const AdminDashboard = () => {
                 </select>
               </div>
 
-              <div>
+              {/* File upload */}
+              {/* <div>
                 <label className="block text-gray-700 font-medium mb-2">
                   Upload Digital Product (PDF, ZIP, etc.)
                 </label>
@@ -506,6 +579,7 @@ const AdminDashboard = () => {
                     })
                   }
                   className="w-full px-4 py-3 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-6 file:rounded-lg file:border-0 file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer"
+                  disabled={isSubmitting}
                 />
                 {editingProduct?.fileUrl && !formData.file && (
                   <div className="mt-3">
@@ -520,8 +594,9 @@ const AdminDashboard = () => {
                     </a>
                   </div>
                 )}
-              </div>
+              </div> */}
 
+              {/* Curriculum */}
               <div className="border-t pt-10">
                 <h3 className="text-2xl font-bold text-gray-800 mb-8">
                   Curriculum Content
@@ -535,6 +610,7 @@ const AdminDashboard = () => {
                     value={newTopicTitle}
                     onChange={(e) => setNewTopicTitle(e.target.value)}
                     className="w-full px-5 py-4 border border-gray-300 rounded-xl mb-5 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    disabled={isSubmitting}
                   />
                   <textarea
                     placeholder="Topic Summary (optional)"
@@ -542,6 +618,7 @@ const AdminDashboard = () => {
                     onChange={(e) => setNewTopicSummary(e.target.value)}
                     rows={3}
                     className="w-full px-5 py-4 border border-gray-300 rounded-xl mb-6 focus:outline-none focus:ring-2 focus:ring-green-500"
+                    disabled={isSubmitting}
                   />
                   <div className="mb-6">
                     <label className="block text-gray-700 font-medium mb-3">
@@ -552,12 +629,18 @@ const AdminDashboard = () => {
                       onChange={setNewTopicContent}
                       theme="snow"
                       className="bg-white rounded-xl"
+                      readOnly={isSubmitting}
                     />
                   </div>
                   <button
                     type="button"
                     onClick={handleAddTopic}
-                    className="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-8 rounded-xl transition-colors"
+                    disabled={isSubmitting}
+                    className={`bg-green-600 text-white font-medium py-3 px-8 rounded-xl transition-colors ${
+                      isSubmitting
+                        ? "opacity-50 cursor-not-allowed"
+                        : "hover:bg-green-700"
+                    }`}
                   >
                     Add Topic
                   </button>
@@ -575,11 +658,12 @@ const AdminDashboard = () => {
                             setCurrentTopicIndex(index);
                             setEditingTopicContent(topic.content || "");
                           }}
+                          disabled={isSubmitting}
                           className={`px-6 py-3 rounded-full font-medium transition-all ${
                             currentTopicIndex === index
                               ? "bg-green-600 text-white shadow-md"
                               : "bg-gray-200 text-gray-800 hover:bg-gray-300"
-                          }`}
+                          } ${isSubmitting ? "opacity-50 cursor-not-allowed" : ""}`}
                         >
                           {topic.title}
                         </button>
@@ -596,19 +680,30 @@ const AdminDashboard = () => {
                           onChange={setEditingTopicContent}
                           theme="snow"
                           className="bg-white rounded-xl mb-6"
+                          readOnly={isSubmitting}
                         />
                         <div className="flex gap-4">
                           <button
                             type="button"
                             onClick={handleSaveTopicContent}
-                            className="bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-8 rounded-xl transition-colors"
+                            disabled={isSubmitting}
+                            className={`bg-green-600 text-white font-medium py-3 px-8 rounded-xl transition-colors ${
+                              isSubmitting
+                                ? "opacity-50 cursor-not-allowed"
+                                : "hover:bg-green-700"
+                            }`}
                           >
                             Save Content
                           </button>
                           <button
                             type="button"
                             onClick={() => setCurrentTopicIndex(-1)}
-                            className="bg-gray-400 hover:bg-gray-500 text-white font-medium py-3 px-8 rounded-xl transition-colors"
+                            disabled={isSubmitting}
+                            className={`bg-gray-400 text-white font-medium py-3 px-8 rounded-xl transition-colors ${
+                              isSubmitting
+                                ? "opacity-50 cursor-not-allowed"
+                                : "hover:bg-gray-500"
+                            }`}
                           >
                             Cancel
                           </button>
@@ -619,6 +714,7 @@ const AdminDashboard = () => {
                 )}
               </div>
 
+              {/* Overview */}
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
                   Overview (attract & inform students)
@@ -628,22 +724,40 @@ const AdminDashboard = () => {
                   onChange={setOverview}
                   theme="snow"
                   className="bg-white rounded-xl"
+                  readOnly={isSubmitting}
                 />
               </div>
 
+              {/* Submit */}
               <div className="pt-8 flex gap-6">
                 <button
                   type="submit"
-                  className="flex-1 bg-green-600 hover:bg-green-700 text-white font-semibold text-lg py-4 px-10 rounded-xl transition-all shadow-md hover:shadow-lg"
+                  disabled={isSubmitting}
+                  className={`flex-1 font-semibold text-lg py-4 px-10 rounded-xl transition-all shadow-md ${
+                    isSubmitting
+                      ? "bg-gray-400 cursor-not-allowed text-white"
+                      : "bg-green-600 hover:bg-green-700 text-white hover:shadow-lg"
+                  }`}
                 >
-                  {editingProduct ? "Update Product" : "Add Product"}
+                  {isSubmitting
+                    ? editingProduct
+                      ? "Updating Product..."
+                      : "Adding Product..."
+                    : editingProduct
+                      ? "Update Product"
+                      : "Add Product"}
                 </button>
 
                 {editingProduct && (
                   <button
                     type="button"
                     onClick={resetForm}
-                    className="flex-1 bg-gray-500 hover:bg-gray-600 text-white font-medium py-4 px-10 rounded-xl transition-colors"
+                    disabled={isSubmitting}
+                    className={`flex-1 font-medium py-4 px-10 rounded-xl transition-colors ${
+                      isSubmitting
+                        ? "bg-gray-300 cursor-not-allowed text-gray-600"
+                        : "bg-gray-500 hover:bg-gray-600 text-white"
+                    }`}
                   >
                     Cancel Edit
                   </button>
@@ -660,7 +774,21 @@ const AdminDashboard = () => {
               Your Digital Products
             </h2>
 
-            {products.length === 0 ? (
+            {loadingProducts ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {[...Array(6)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="bg-white p-6 rounded-xl shadow-md border border-gray-200 animate-pulse"
+                  >
+                    <div className="w-full h-48 bg-gray-200 rounded-t-lg mb-4"></div>
+                    <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/2 mb-1"></div>
+                    <div className="h-4 bg-gray-200 rounded w-1/3"></div>
+                  </div>
+                ))}
+              </div>
+            ) : products.length === 0 ? (
               <div className="bg-white p-12 rounded-2xl shadow-md text-center text-gray-600">
                 No products created yet.
               </div>
@@ -723,7 +851,23 @@ const AdminDashboard = () => {
               Recent Orders (All Users)
             </h2>
 
-            {orders.length === 0 ? (
+            {loadingOrders ? (
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                {[...Array(4)].map((_, i) => (
+                  <div
+                    key={i}
+                    className="bg-white p-6 rounded-xl shadow-md border border-gray-200 animate-pulse"
+                  >
+                    <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-200 rounded w-full"></div>
+                      <div className="h-4 bg-gray-200 rounded w-5/6"></div>
+                      <div className="h-4 bg-gray-200 rounded w-4/6"></div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : orders.length === 0 ? (
               <div className="bg-white p-12 rounded-2xl shadow-md text-center text-gray-600">
                 No orders yet.
               </div>
@@ -786,23 +930,38 @@ const AdminDashboard = () => {
         {/* Analytics */}
         {activeSection === "analytics" && (
           <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <div className="bg-white p-10 rounded-2xl shadow-lg border border-gray-100">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">
-                Total Orders
-              </h3>
-              <p className="text-5xl font-extrabold text-green-600">
-                {analytics.totalOrders || 0}
-              </p>
-            </div>
+            {loadingAnalytics ? (
+              <>
+                <div className="bg-white p-10 rounded-2xl shadow-lg border border-gray-100 animate-pulse">
+                  <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
+                  <div className="h-12 bg-gray-200 rounded w-1/2"></div>
+                </div>
+                <div className="bg-white p-10 rounded-2xl shadow-lg border border-gray-100 animate-pulse">
+                  <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
+                  <div className="h-12 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="bg-white p-10 rounded-2xl shadow-lg border border-gray-100">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4">
+                    Total Orders
+                  </h3>
+                  <p className="text-5xl font-extrabold text-green-600">
+                    {analytics.totalOrders || 0}
+                  </p>
+                </div>
 
-            <div className="bg-white p-10 rounded-2xl shadow-lg border border-gray-100">
-              <h3 className="text-xl font-bold text-gray-800 mb-4">
-                Total Enrollments
-              </h3>
-              <p className="text-5xl font-extrabold text-green-600">
-                {analytics.totalEnrollments || 0}
-              </p>
-            </div>
+                <div className="bg-white p-10 rounded-2xl shadow-lg border border-gray-100">
+                  <h3 className="text-xl font-bold text-gray-800 mb-4">
+                    Total Enrollments
+                  </h3>
+                  <p className="text-5xl font-extrabold text-green-600">
+                    {analytics.totalEnrollments || 0}
+                  </p>
+                </div>
+              </>
+            )}
           </section>
         )}
 
@@ -830,6 +989,7 @@ const AdminDashboard = () => {
                   className="w-full px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                   autoComplete="current-password"
+                  disabled={changingPassword}
                 />
               </div>
 
@@ -849,6 +1009,7 @@ const AdminDashboard = () => {
                   className="w-full px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                   autoComplete="new-password"
+                  disabled={changingPassword}
                 />
               </div>
 
@@ -868,6 +1029,7 @@ const AdminDashboard = () => {
                   className="w-full px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                   autoComplete="new-password"
+                  disabled={changingPassword}
                 />
               </div>
 

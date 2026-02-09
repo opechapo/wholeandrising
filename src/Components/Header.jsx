@@ -21,9 +21,17 @@ const Header = () => {
 
   const dashboardLink = role === "admin" ? "/admin" : "/dashboard";
 
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("role");
+    setIsLoggedIn(false);
+    setRole(null);
+    navigate("/login");
+  };
+
   return (
-    <header className="bg-white shadow-md py-4 sticky top-0 z-50">
-      <nav className="container mx-auto flex justify-between items-center px-4">
+    <header className="bg-white shadow-md py-7 sticky top-0 z-50">
+      <nav className="container mx-auto flex justify-between items-center px-4 md:px-8">
         <Link
           to="/"
           className="text-2xl md:text-3xl font-bold text-green-600 hover:text-green-700 transition-colors"
@@ -35,40 +43,42 @@ const Header = () => {
           <li>
             <Link
               to="/digital-products"
-              className="text-gray-700 hover:text-green-600 transition-colors"
+              className="text-gray-700 hover:text-green-600"
             >
               Digital Products
             </Link>
           </li>
           <li>
-            <Link
-              to="/about"
-              className="text-gray-700 hover:text-green-600 transition-colors"
-            >
+            <Link to="/about" className="text-gray-700 hover:text-green-600">
               About
             </Link>
           </li>
           <li>
-            <Link
-              to="/contact"
-              className="text-gray-700 hover:text-green-600 transition-colors"
-            >
+            <Link to="/contact" className="text-gray-700 hover:text-green-600">
               Contact
             </Link>
           </li>
 
-          <li>
+          <li className="flex items-center gap-6">
             {isLoggedIn ? (
-              <Link
-                to={dashboardLink}
-                className="text-green-600 hover:text-green-800 font-medium transition-colors"
-              >
-                Dashboard
-              </Link>
+              <>
+                <Link
+                  to={dashboardLink}
+                  className="text-green-600 hover:text-green-800 font-medium"
+                >
+                  Dashboard
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-5 rounded-lg transition-colors"
+                >
+                  Logout
+                </button>
+              </>
             ) : (
               <Link
                 to="/login"
-                className="text-green-600 hover:text-green-800 font-medium transition-colors"
+                className="text-green-600 hover:text-green-800 font-medium"
               >
                 Login / Sign Up
               </Link>
