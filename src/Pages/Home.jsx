@@ -1,23 +1,51 @@
-import React from "react";
+import React, { useRef } from "react";
+import { motion } from "framer-motion";
 
-// Import your images here (generate them using the prompts above)
 import heroBg from "../assets/images/hero-wellness-bg.png";
+import heroVideo from "../assets/images/MindVideo_20260209154554_102.mp4";
 import growthImg from "../assets/images/growth-flatlay.png";
 import avatarSarah from "../assets/images/avatar-sarah.png";
 import avatarJames from "../assets/images/avatar-james.png";
 import avatarAisha from "../assets/images/avatar-aisha.png";
 
 const Home = () => {
+  const videoRef = useRef(null);
+
+  // Optional: gentle entrance for the video container (very subtle)
+  const videoContainerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: { duration: 1.2, ease: "easeOut" },
+    },
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-[#fdfaf5] to-[#f5f5f4]">
-      {/* Hero Section */}
-      <section
-        className="relative min-h-[70vh] md:min-h-[80vh] flex items-center justify-center bg-cover bg-center text-center px-6"
-        style={{
-          backgroundImage: `url(${heroBg})`,
-        }}
-      >
-        <div className="relative z-10 max-w-4xl mx-auto">
+      {/* Hero Section – Seamless looping video only */}
+      <section className="relative min-h-[70vh] md:min-h-[80vh] flex items-center justify-center text-center px-6 overflow-hidden">
+        <motion.div
+          className="absolute inset-0"
+          variants={videoContainerVariants}
+          initial="hidden"
+          animate="visible"
+        >
+          <video
+            ref={videoRef}
+            src={heroVideo}
+            autoPlay
+            muted
+            playsInline
+            loop
+            className="w-full h-full object-cover"
+          />
+        </motion.div>
+
+        {/* Dark overlay for text readability */}
+        <div className="absolute inset-0 bg-black/35 z-10" />
+
+        {/* Hero content */}
+        <div className="relative z-20 max-w-4xl mx-auto">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white tracking-tight drop-shadow-lg">
             Welcome to Whole and Rising
           </h1>
@@ -29,7 +57,7 @@ const Home = () => {
             href="/digital-products"
             className="
               mt-10 inline-block
-              bg-emerald-600 hover:bg-emerald-700
+              bg-emerald-400 hover:bg-emerald-500
               text-white font-semibold
               py-4 px-12 rounded-full
               shadow-xl hover:shadow-2xl
