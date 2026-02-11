@@ -35,7 +35,7 @@ const Header = () => {
 
   return (
     <header className="bg-white py-5 md:py-7 sticky top-0 z-50 transition-all duration-300">
-      <nav className="container mx-auto flex justify-between items-center px-5 md:px-10">
+      <nav className="container mx-auto flex pl-0 md:pl-1 justify-between items-center px-5 md:px-10">
         {/* Logo - always visible */}
         <Link to="/" className="flex items-center z-50" onClick={closeMenu}>
           <img

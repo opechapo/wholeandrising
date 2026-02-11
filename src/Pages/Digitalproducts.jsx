@@ -101,7 +101,7 @@ const DigitalProducts = () => {
 
   if (loading) {
     return (
-      <div className="container mx-auto py-12 px-4">
+      <div className="container mx-auto py-12 px-4 mb-32 md:mb-40 lg:mb-48">
         <h1 className="text-4xl font-bold text-center text-gray-800 mb-12">
           Digital Products
         </h1>
@@ -116,7 +116,7 @@ const DigitalProducts = () => {
 
   if (error) {
     return (
-      <div className="container mx-auto py-12 px-4 text-center">
+      <div className="container mx-auto py-12 px-4 text-center mb-32 md:mb-40 lg:mb-48">
         <h1 className="text-4xl font-bold text-gray-800 mb-8">
           Digital Products
         </h1>
@@ -135,7 +135,7 @@ const DigitalProducts = () => {
   }
 
   return (
-    <div className="container mx-auto py-8 px-4">
+    <div className="container mx-auto py-8 px-4 mb-32 md:mb-40 lg:mb-48">
       <h1 className="text-4xl font-bold text-center text-gray-800 mb-8">
         Digital Products
       </h1>
@@ -166,11 +166,11 @@ const DigitalProducts = () => {
       </div>
 
       {filteredProducts.length === 0 ? (
-        <div className="text-center py-16 text-gray-500 text-xl">
+        <div className="text-center py-16 text-gray-500 text-xl mb-24 md:mb-32">
           No products found in this category.
         </div>
       ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8 pb-12">
           {filteredProducts.map((product) => (
             <ProductCard key={product._id} product={product} />
           ))}

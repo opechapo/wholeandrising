@@ -11,7 +11,6 @@ import avatarAisha from "../assets/images/avatar-aisha.png";
 const Home = () => {
   const videoRef = useRef(null);
 
-  // Optional: gentle entrance for the video container (very subtle)
   const videoContainerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -41,7 +40,7 @@ const Home = () => {
           />
         </motion.div>
 
-        {/* Dark overlay for text readability */}
+        {/* Dark overlay */}
         <div className="absolute inset-0 bg-black/35 z-10" />
 
         {/* Hero content */}
@@ -70,34 +69,44 @@ const Home = () => {
         </div>
       </section>
 
-      {/* What You'll Gain */}
-      <section className="py-16 md:py-24 px-6">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center text-emerald-800 mb-12">
+      {/* What You'll Gain – more horizontal padding */}
+      <section className="py-20 md:py-32 px-6 sm:px-10 md:px-16 lg:px-24 xl:px-32">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-center text-emerald-800 mb-16 md:mb-20 tracking-tight">
             What You’ll Gain
           </h2>
 
-          <div className="grid md:grid-cols-2 gap-10 items-center">
+          <div className="grid md:grid-cols-2 gap-12 lg:gap-20 items-center">
             <div>
-              <ul className="space-y-6 text-lg md:text-xl text-gray-700">
+              <ul className="space-y-8 md:space-y-10 text-lg md:text-xl lg:text-2xl text-gray-700 leading-relaxed">
                 <li className="flex items-start">
-                  <span className="text-emerald-600 text-2xl mr-4">✓</span>
+                  <span className="text-emerald-600 text-3xl md:text-4xl mr-5 mt-1">
+                    ✓
+                  </span>
                   Build unshakable confidence and authentic self-expression
                 </li>
                 <li className="flex items-start">
-                  <span className="text-emerald-600 text-2xl mr-4">✓</span>
+                  <span className="text-emerald-600 text-3xl md:text-4xl mr-5 mt-1">
+                    ✓
+                  </span>
                   Create healthy, joyful habits for the whole family
                 </li>
                 <li className="flex items-start">
-                  <span className="text-emerald-600 text-2xl mr-4">✓</span>
+                  <span className="text-emerald-600 text-3xl md:text-4xl mr-5 mt-1">
+                    ✓
+                  </span>
                   Make intentional choices that align with your values
                 </li>
                 <li className="flex items-start">
-                  <span className="text-emerald-600 text-2xl mr-4">✓</span>
+                  <span className="text-emerald-600 text-3xl md:text-4xl mr-5 mt-1">
+                    ✓
+                  </span>
                   Release limiting beliefs and emotional blocks
                 </li>
                 <li className="flex items-start">
-                  <span className="text-emerald-600 text-2xl mr-4">✓</span>
+                  <span className="text-emerald-600 text-3xl md:text-4xl mr-5 mt-1">
+                    ✓
+                  </span>
                   Live a life rooted in connection, clarity, and purpose
                 </li>
               </ul>
@@ -107,90 +116,78 @@ const Home = () => {
               <img
                 src={growthImg}
                 alt="Wellness flatlay - journal, nature elements, calm aesthetic"
-                className="rounded-2xl shadow-2xl object-cover h-full w-full"
+                className="rounded-3xl shadow-2xl object-cover w-full h-auto lg:h-[580px] xl:h-[680px] transition-transform duration-500 hover:scale-[1.02]"
               />
             </div>
           </div>
         </div>
       </section>
 
-      {/* Testimonials Section */}
-      <section className="py-16 md:py-24 bg-gradient-to-br from-emerald-50 to-teal-50 px-6">
-        <div className="max-w-6xl mx-auto">
-          <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-center text-emerald-800 mb-16">
+      {/* Testimonials Section – more horizontal padding */}
+      <section className="py-20 md:py-32 bg-gradient-to-br from-emerald-50 via-white to-teal-50 px-6 sm:px-10 md:px-16 lg:px-24 xl:px-32">
+        <div className="max-w-7xl mx-auto">
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-center text-emerald-800 mb-16 md:mb-24 tracking-tight">
             What People Are Saying
           </h2>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-emerald-100">
-              <div className="flex items-center mb-6">
-                <img
-                  src={avatarSarah}
-                  alt="Sarah M."
-                  className="w-16 h-16 rounded-full object-cover mr-4 border-2 border-emerald-200"
-                />
-                <div>
-                  <p className="font-semibold text-gray-900">Sarah M.</p>
-                  <p className="text-sm text-gray-500">
-                    Working Mom & Growth Enthusiast
-                  </p>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12">
+            {[
+              {
+                img: avatarSarah,
+                name: "Sarah M.",
+                role: "Working Mom & Growth Enthusiast",
+                quote:
+                  "These gentle tools helped me reclaim my energy and create sacred family moments again.",
+              },
+              {
+                img: avatarJames,
+                name: "James K.",
+                role: "Career Transition Coach",
+                quote:
+                  "A real digital sanctuary — helped me unpack old beliefs and realign with purpose.",
+              },
+              {
+                img: avatarAisha,
+                name: "Kim R.",
+                role: "Wellness Advocate & Yoga Instructor",
+                quote:
+                  "Deepened my home practice and brought emotional connection back to center.",
+              },
+            ].map((testimonial, idx) => (
+              <div
+                key={idx}
+                className="bg-white p-8 md:p-10 rounded-3xl shadow-xl hover:shadow-2xl transition-all duration-300 border border-emerald-100/60 hover:border-emerald-200 group"
+              >
+                <div className="flex items-center mb-8">
+                  <img
+                    src={testimonial.img}
+                    alt={testimonial.name}
+                    className="w-20 h-20 md:w-24 md:h-24 rounded-full object-cover mr-5 border-4 border-emerald-100 group-hover:border-emerald-200 transition-colors"
+                  />
+                  <div>
+                    <p className="font-bold text-xl md:text-2xl text-gray-900">
+                      {testimonial.name}
+                    </p>
+                    <p className="text-base md:text-lg text-emerald-700 font-medium">
+                      {testimonial.role}
+                    </p>
+                  </div>
                 </div>
+                <p className="text-gray-700 italic text-lg md:text-xl leading-relaxed">
+                  "{testimonial.quote}"
+                </p>
               </div>
-              <p className="text-gray-700 italic leading-relaxed">
-                "These gentle tools helped me reclaim my energy and create
-                sacred family moments again."
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-emerald-100">
-              <div className="flex items-center mb-6">
-                <img
-                  src={avatarJames}
-                  alt="James K."
-                  className="w-16 h-16 rounded-full object-cover mr-4 border-2 border-emerald-200"
-                />
-                <div>
-                  <p className="font-semibold text-gray-900">James K.</p>
-                  <p className="text-sm text-gray-500">
-                    Career Transition Coach
-                  </p>
-                </div>
-              </div>
-              <p className="text-gray-700 italic leading-relaxed">
-                "A real digital sanctuary — helped me unpack old beliefs and
-                realign with purpose."
-              </p>
-            </div>
-
-            <div className="bg-white p-8 rounded-2xl shadow-lg hover:shadow-xl transition-all duration-300 border border-emerald-100">
-              <div className="flex items-center mb-6">
-                <img
-                  src={avatarAisha}
-                  alt="Kim R."
-                  className="w-16 h-16 rounded-full object-cover mr-4 border-2 border-emerald-200"
-                />
-                <div>
-                  <p className="font-semibold text-gray-900">Kim R.</p>
-                  <p className="text-sm text-gray-500">
-                    Wellness Advocate & Yoga Instructor
-                  </p>
-                </div>
-              </div>
-              <p className="text-gray-700 italic leading-relaxed">
-                "Deepened my home practice and brought emotional connection back
-                to center."
-              </p>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
       {/* Final CTA */}
-      <section className="py-20 text-center bg-emerald-800 text-white px-6">
-        <h2 className="text-3xl md:text-4xl font-bold mb-6">
+      <section className="py-20 md:py-32 text-center bg-emerald-800 text-white px-6">
+        <h2 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-8 tracking-tight">
           Ready to Begin Your Becoming?
         </h2>
-        <p className="text-xl md:text-2xl max-w-3xl mx-auto mb-10 opacity-90">
+        <p className="text-xl md:text-2xl lg:text-3xl max-w-4xl mx-auto mb-12 opacity-90">
           Join others who are choosing intention, growth, and wholeness one
           small, powerful step at a time.
         </p>
@@ -198,8 +195,9 @@ const Home = () => {
           href="/digital-products"
           className="
             inline-block bg-white text-emerald-800 font-bold
-            py-5 px-14 rounded-full text-xl
-            hover:bg-emerald-50 transition-colors shadow-xl
+            py-5 px-16 rounded-full text-xl md:text-2xl
+            hover:bg-emerald-50 transition-all shadow-2xl hover:shadow-3xl
+            transform hover:-translate-y-1 duration-300
           "
         >
           Browse All Products
