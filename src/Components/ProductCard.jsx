@@ -44,13 +44,13 @@ const ProductCard = ({ product }) => {
   };
 
   const openModal = (e) => {
-    e.stopPropagation(); // prevent bubbling if needed
+    e.stopPropagation();
     setShowModal(true);
   };
 
   const closeModal = () => {
     setShowModal(false);
-    setPaymentStatus(null); // reset status when closing
+    setPaymentStatus(null);
   };
 
   return (
@@ -138,13 +138,25 @@ const ProductCard = ({ product }) => {
                 </span>
               </div>
 
-              {/* Featured image in modal */}
+              {/* Featured image in modal – now shows FULL image */}
               {product.featuredImageUrl && (
-                <img
-                  src={`${product.featuredImageUrl}?tr=w-1200,h-800,q-85,f-webp`}
-                  alt={product.title}
-                  className="w-full h-64 md:h-96 object-cover rounded-xl mb-10 shadow-lg"
-                />
+                <div className="mb-10 flex justify-center">
+                  <img
+                    src={`${product.featuredImageUrl}?tr=w-1200,q-85,f-webp`}
+                    alt={product.title}
+                    className="
+                      max-w-full max-h-[70vh] 
+                      object-contain 
+                      rounded-xl 
+                      shadow-lg
+                      mx-auto
+                    "
+                    onError={(e) => {
+                      e.target.src =
+                        "https://placehold.co/1200x800?text=Image+Not+Available";
+                    }}
+                  />
+                </div>
               )}
 
               {/* Overview / Why you need this */}
