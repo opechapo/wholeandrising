@@ -46,6 +46,7 @@ const AdminDashboard = () => {
   const [passwordError, setPasswordError] = useState(null);
   const [changingPassword, setChangingPassword] = useState(false);
   const navigate = useNavigate();
+
   const getCachedData = () => {
     try {
       const cached = localStorage.getItem(CACHE_KEY);
@@ -60,6 +61,7 @@ const AdminDashboard = () => {
       return null;
     }
   };
+
   const setCachedData = (data) => {
     try {
       localStorage.setItem(
@@ -68,6 +70,7 @@ const AdminDashboard = () => {
       );
     } catch {}
   };
+
   const fetchData = async (forceRefresh = false) => {
     const token = localStorage.getItem("token");
     if (!token) {
@@ -79,7 +82,6 @@ const AdminDashboard = () => {
       headers: { Authorization: `Bearer ${token}` },
     };
 
-    // Use cache if available and not forced
     if (!forceRefresh) {
       const cached = getCachedData();
       if (cached) {
@@ -124,7 +126,6 @@ const AdminDashboard = () => {
       setOrders(newData.orders);
       setAnalytics(newData.analytics);
 
-      // Cache fresh data
       setCachedData(newData);
     } catch (err) {
       console.error("Dashboard fetch error:", err);
@@ -242,7 +243,6 @@ const AdminDashboard = () => {
       }
 
       resetForm();
-      // Force refresh after mutation
       fetchData(true);
     } catch (err) {
       console.error("Product save error:", err);
@@ -277,6 +277,9 @@ const AdminDashboard = () => {
     setCurriculum(product.curriculum || []);
     setCurrentTopicIndex(-1);
     setEditingTopicContent("");
+
+    // ← This line was added / fixed
+    setActiveSection("add-product");
   };
 
   const handleDelete = async (id) => {
@@ -289,7 +292,6 @@ const AdminDashboard = () => {
     try {
       await axios.delete(`${BACKEND_URL}/api/products/${id}`, config);
       alert("Product deleted successfully!");
-      // Force refresh after delete
       fetchData(true);
     } catch (err) {
       console.error("Delete error:", err);
@@ -332,9 +334,7 @@ const AdminDashboard = () => {
           currentPassword: passwordForm.currentPassword,
           newPassword: passwordForm.newPassword,
         },
-        {
-          headers: { Authorization: `Bearer ${token}` },
-        },
+        { headers: { Authorization: `Bearer ${token}` } },
       );
 
       setPasswordMessage(res.data.msg || "Password updated successfully!");
@@ -358,6 +358,7 @@ const AdminDashboard = () => {
       setChangingPassword(false);
     }
   };
+
   const SkeletonCard = () => (
     <div className="bg-white p-6 rounded-xl shadow-md border border-gray-200 animate-pulse">
       <div className="w-full h-48 bg-gray-200 rounded-t-lg mb-4"></div>
@@ -565,37 +566,6 @@ const AdminDashboard = () => {
                 </select>
               </div>
 
-              {/* File upload */}
-              {/* <div>
-                <label className="block text-gray-700 font-medium mb-2">
-                  Upload Digital Product (PDF, ZIP, etc.)
-                </label>
-                <input
-                  type="file"
-                  onChange={(e) =>
-                    setFormData({
-                      ...formData,
-                      file: e.target.files[0] || null,
-                    })
-                  }
-                  className="w-full px-4 py-3 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-6 file:rounded-lg file:border-0 file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer"
-                  disabled={isSubmitting}
-                />
-                {editingProduct?.fileUrl && !formData.file && (
-                  <div className="mt-3">
-                    <p className="text-sm text-gray-600">Current file:</p>
-                    <a
-                      href={editingProduct.fileUrl}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-green-600 hover:underline"
-                    >
-                      View/Download
-                    </a>
-                  </div>
-                )}
-              </div> */}
-
               {/* Curriculum */}
               <div className="border-t pt-10">
                 <h3 className="text-2xl font-bold text-gray-800 mb-8">
@@ -777,15 +747,7 @@ const AdminDashboard = () => {
             {loadingProducts ? (
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
                 {[...Array(6)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="bg-white p-6 rounded-xl shadow-md border border-gray-200 animate-pulse"
-                  >
-                    <div className="w-full h-48 bg-gray-200 rounded-t-lg mb-4"></div>
-                    <div className="h-6 bg-gray-200 rounded w-3/4 mb-2"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/2 mb-1"></div>
-                    <div className="h-4 bg-gray-200 rounded w-1/3"></div>
-                  </div>
+                  <SkeletonCard key={i} />
                 ))}
               </div>
             ) : products.length === 0 ? (
@@ -825,13 +787,19 @@ const AdminDashboard = () => {
                     </p>
                     <div className="flex gap-4">
                       <button
-                        onClick={() => handleEdit(product)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleEdit(product);
+                        }}
                         className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"
                       >
                         Edit
                       </button>
                       <button
-                        onClick={() => handleDelete(product._id)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDelete(product._id);
+                        }}
                         className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition-colors"
                       >
                         Delete
@@ -854,17 +822,7 @@ const AdminDashboard = () => {
             {loadingOrders ? (
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                 {[...Array(4)].map((_, i) => (
-                  <div
-                    key={i}
-                    className="bg-white p-6 rounded-xl shadow-md border border-gray-200 animate-pulse"
-                  >
-                    <div className="h-6 bg-gray-200 rounded w-3/4 mb-4"></div>
-                    <div className="space-y-2">
-                      <div className="h-4 bg-gray-200 rounded w-full"></div>
-                      <div className="h-4 bg-gray-200 rounded w-5/6"></div>
-                      <div className="h-4 bg-gray-200 rounded w-4/6"></div>
-                    </div>
-                  </div>
+                  <SkeletonOrder key={i} />
                 ))}
               </div>
             ) : orders.length === 0 ? (
