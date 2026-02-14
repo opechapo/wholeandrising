@@ -24,6 +24,7 @@ function App() {
         locale: "en_GB",
         components: "buttons",
         "enable-funding": "paylater,venmo",
+        environment: "sandbox",
       }}
     >
       <Router>
