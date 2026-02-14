@@ -17,7 +17,8 @@ function App() {
     <PayPalScriptProvider
       options={{
         "client-id":
-          "Acan1RAWRS575zv2a1IBxbrOiTlkToyxc235eiQum6fuQnigE5DnkgwAcaq-NiCBALPayJXc89XWFY0v",
+          import.meta.env.VITE_PAYPAL_CLIENT_ID ||
+          "AV1DNSv-OrrsykLM2v6uF9hqVqi1AOSEQFcNBC0HD_O6OCcZlqL7Rprrcmmz9r9zNNtLlBYJ6l7oyjNl",
         currency: "GBP",
         intent: "capture",
         locale: "en_GB",

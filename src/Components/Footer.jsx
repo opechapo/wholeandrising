@@ -64,7 +64,6 @@ const Footer = () => {
                   />
                 </svg>
               </a>
-              {/* Add more social icons here if needed */}
             </div>
           </div>
 
