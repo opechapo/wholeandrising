@@ -305,7 +305,7 @@ const Header = () => {
       )}
 
       {/* Fade-in animation keyframes - keep your original */}
-      <style jsx global>{`
+      <style>{`
         @keyframes fadeInUp {
           from {
             opacity: 0;

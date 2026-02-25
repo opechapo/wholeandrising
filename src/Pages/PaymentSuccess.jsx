@@ -1,15 +1,17 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { CheckCircle, Download, ArrowRight } from "lucide-react";
+import axios from "axios"; // NEW
+
+const BACKEND_URL = "https://wholeandrisingbacknd-7uns.onrender.com";
 
 const PaymentSuccess = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const [orderId, setOrderId] = useState(null);
+  const [sessionId, setSessionId] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-
-  const BACKEND_URL = "https://wholeandrisingbacknd-7uns.onrender.com";
+  const [sessionDetails, setSessionDetails] = useState(null);
 
   useEffect(() => {
     const token = localStorage.getItem("token");
@@ -18,17 +20,32 @@ const PaymentSuccess = () => {
       return;
     }
 
-    // Optional: You can fetch order details using PayPal orderID from query param
-    const paypalOrderId = searchParams.get("token");
+    const stripeSessionId = searchParams.get("session_id");
 
-    if (paypalOrderId) {
-      // You could call your backend to verify / get order details
-      // For simplicity, we just show success message
-      setOrderId(paypalOrderId);
+    if (stripeSessionId) {
+      setSessionId(stripeSessionId);
+      verifySession(stripeSessionId);
     }
 
     setLoading(false);
   }, [searchParams, navigate]);
+
+  const verifySession = async (id) => {
+    try {
+      const res = await axios.get(
+        `${BACKEND_URL}/api/payments/verify-session/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem("token") || ""}`,
+          },
+        },
+      );
+      setSessionDetails(res.data);
+    } catch (err) {
+      console.error("Session verification error:", err);
+      setError("Failed to verify payment");
+    }
+  };
 
   if (loading) {
     return (
@@ -42,22 +59,30 @@ const PaymentSuccess = () => {
     <div className="container mx-auto px-4 py-16 max-w-2xl">
       <div className="bg-white rounded-2xl shadow-xl p-8 md:p-12 text-center">
         <CheckCircle className="w-20 h-20 text-green-500 mx-auto mb-6" />
-
         <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
           Payment Successful!
         </h1>
-
         <p className="text-xl text-gray-700 mb-8">
           Thank you for your purchase. Your digital product is now ready to
           download.
         </p>
-
-        {orderId && (
+        {sessionId && (
           <p className="text-sm text-gray-500 mb-8">
-            PayPal Transaction ID: <strong>{orderId}</strong>
+            Stripe Session ID: <strong>{sessionId}</strong>
           </p>
         )}
-
+        {sessionDetails?.invoiceUrl && ( // NEW - Show invoice if generated
+          <p className="text-sm text-gray-500 mb-8">
+            <a
+              href={sessionDetails.invoiceUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              View Invoice
+            </a>
+          </p>
+        )}
+        {error && <p className="text-red-500 mb-8">{error}</p>} {/* NEW */}
         <div className="space-y-6 mb-10">
           <div className="bg-green-50 border border-green-200 rounded-xl p-6">
             <h3 className="text-xl font-semibold text-green-800 mb-2">
@@ -87,7 +112,6 @@ const PaymentSuccess = () => {
             </button>
           </div>
         </div>
-
         <p className="text-gray-500 text-sm">
           A receipt has been sent to your email (if provided).
           <br />

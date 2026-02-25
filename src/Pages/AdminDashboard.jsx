@@ -24,8 +24,8 @@ const AdminDashboard = () => {
     description: "",
     price: "",
     category: "ebooks",
-    file: null,
-    featuredImage: null,
+    file: null, // ← Main downloadable file (PDF)
+    featuredImage: null, // Thumbnail image
   });
   const [pricingModel, setPricingModel] = useState("paid");
   const [overview, setOverview] = useState("");
@@ -46,6 +46,18 @@ const AdminDashboard = () => {
   const [passwordError, setPasswordError] = useState(null);
   const [changingPassword, setChangingPassword] = useState(false);
   const navigate = useNavigate();
+
+  // ReactQuill toolbar with alignment
+  const quillModules = {
+    toolbar: [
+      [{ header: [1, 2, 3, false] }],
+      ["bold", "italic", "underline", "strike"],
+      [{ list: "ordered" }, { list: "bullet" }],
+      [{ align: [] }],
+      ["link", "image"],
+      ["clean"],
+    ],
+  };
 
   const getCachedData = () => {
     try {
@@ -265,20 +277,30 @@ const AdminDashboard = () => {
   const handleEdit = (product) => {
     setEditingProduct(product);
     setFormData({
-      title: product.title,
-      description: product.description,
-      price: product.price.toString(),
-      category: product.category,
-      file: null,
+      title: product.title || "",
+      description: product.description || "",
+      price: product.price?.toString() || "",
+      category: product.category || "ebooks",
+      file: null, // reset file input (but show current URL)
       featuredImage: null,
     });
     setPricingModel(product.pricingModel || "paid");
     setOverview(product.overview || "");
-    setCurriculum(product.curriculum || []);
+
+    const loadedCurriculum =
+      product.curriculum?.map((topic) => ({
+        title: topic.title || "",
+        summary: topic.summary || "",
+        content: topic.content || "",
+      })) || [];
+    setCurriculum(loadedCurriculum);
+
+    setNewTopicTitle("");
+    setNewTopicSummary("");
+    setNewTopicContent("");
     setCurrentTopicIndex(-1);
     setEditingTopicContent("");
 
-    // ← This line was added / fixed
     setActiveSection("add-product");
   };
 
@@ -306,6 +328,10 @@ const AdminDashboard = () => {
         );
       }
     }
+  };
+
+  const handlePreview = (product) => {
+    navigate("/admin/preview", { state: { product } });
   };
 
   const handlePasswordChange = async (e) => {
@@ -452,7 +478,7 @@ const AdminDashboard = () => {
                 />
               </div>
 
-              {/* Featured Image */}
+              {/* Featured Image (Thumbnail) */}
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
                   Featured Image (Thumbnail)
@@ -472,7 +498,7 @@ const AdminDashboard = () => {
                 {editingProduct?.featuredImageUrl &&
                   !formData.featuredImage && (
                     <div className="mt-3">
-                      <p className="text-sm text-gray-600">Current:</p>
+                      <p className="text-sm text-gray-600">Current image:</p>
                       <img
                         src={`${editingProduct.featuredImageUrl}?tr=w-300,h-300,q-85,f-webp`}
                         alt="Current thumbnail"
@@ -480,6 +506,49 @@ const AdminDashboard = () => {
                       />
                     </div>
                   )}
+                {formData.featuredImage && (
+                  <p className="mt-2 text-sm text-gray-600">
+                    Selected: {formData.featuredImage.name}
+                  </p>
+                )}
+              </div>
+
+              {/* Downloadable PDF File */}
+              <div>
+                <label className="block text-gray-700 font-medium mb-2">
+                  Downloadable PDF File (students will download this)
+                </label>
+                <input
+                  type="file"
+                  accept=".pdf"
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      file: e.target.files[0] || null,
+                    })
+                  }
+                  className="w-full px-4 py-3 border border-gray-300 rounded-lg file:mr-4 file:py-2 file:px-6 file:rounded-lg file:border-0 file:bg-gray-100 file:text-gray-700 hover:file:bg-gray-200 cursor-pointer"
+                  disabled={isSubmitting}
+                />
+                {editingProduct?.fileUrl && !formData.file && (
+                  <div className="mt-3">
+                    <p className="text-sm text-gray-600">Current file:</p>
+                    <a
+                      href={editingProduct.fileUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-green-600 hover:underline text-sm"
+                    >
+                      View / Download current PDF →
+                    </a>
+                  </div>
+                )}
+                {formData.file && (
+                  <p className="mt-2 text-sm text-gray-600">
+                    Selected: {formData.file.name} (
+                    {(formData.file.size / 1024 / 1024).toFixed(2)} MB)
+                  </p>
+                )}
               </div>
 
               {/* Pricing */}
@@ -598,7 +667,8 @@ const AdminDashboard = () => {
                       value={newTopicContent}
                       onChange={setNewTopicContent}
                       theme="snow"
-                      className="bg-white rounded-xl"
+                      modules={quillModules}
+                      className="bg-white rounded-xl h-64"
                       readOnly={isSubmitting}
                     />
                   </div>
@@ -649,7 +719,8 @@ const AdminDashboard = () => {
                           value={editingTopicContent}
                           onChange={setEditingTopicContent}
                           theme="snow"
-                          className="bg-white rounded-xl mb-6"
+                          modules={quillModules}
+                          className="bg-white rounded-xl mb-6 h-64"
                           readOnly={isSubmitting}
                         />
                         <div className="flex gap-4">
@@ -693,7 +764,8 @@ const AdminDashboard = () => {
                   value={overview}
                   onChange={setOverview}
                   theme="snow"
-                  className="bg-white rounded-xl"
+                  modules={quillModules}
+                  className="bg-white rounded-xl h-64"
                   readOnly={isSubmitting}
                 />
               </div>
@@ -785,13 +857,26 @@ const AdminDashboard = () => {
                       Updated:{" "}
                       {new Date(product.updatedAt).toLocaleDateString()}
                     </p>
-                    <div className="flex gap-4">
+                    {product.fileUrl && (
+                      <p className="text-sm text-green-600 mb-2">
+                        File attached:{" "}
+                        <a
+                          href={product.fileUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline"
+                        >
+                          Download PDF
+                        </a>
+                      </p>
+                    )}
+                    <div className="grid grid-cols-3 gap-3 mt-4">
                       <button
                         onClick={(e) => {
                           e.stopPropagation();
                           handleEdit(product);
                         }}
-                        className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"
+                        className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors text-sm"
                       >
                         Edit
                       </button>
@@ -800,9 +885,18 @@ const AdminDashboard = () => {
                           e.stopPropagation();
                           handleDelete(product._id);
                         }}
-                        className="flex-1 bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition-colors"
+                        className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition-colors text-sm"
                       >
                         Delete
+                      </button>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate("/admin/preview", { state: { product } });
+                        }}
+                        className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg transition-colors text-sm"
+                      >
+                        Preview
                       </button>
                     </div>
                   </div>

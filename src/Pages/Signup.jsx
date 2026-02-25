@@ -1,4 +1,3 @@
-// src/Pages/Signup.jsx
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Eye, EyeOff } from "lucide-react";
@@ -12,6 +11,7 @@ const Signup = () => {
   });
   const [errorMsg, setErrorMsg] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false); // ← added
   const navigate = useNavigate();
 
   const BACKEND_URL = "https://wholeandrisingbacknd-7uns.onrender.com";
@@ -19,6 +19,7 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setErrorMsg("");
+    setIsLoading(true); // ← start loading
 
     try {
       const res = await axios.post(`${BACKEND_URL}/api/auth/signup`, formData, {
@@ -32,6 +33,8 @@ const Signup = () => {
       const msg = err.response?.data?.msg || "Something went wrong. Try again.";
       setErrorMsg(msg);
       console.error("Signup failed:", err);
+    } finally {
+      setIsLoading(false); // ← stop loading
     }
   };
 
@@ -65,6 +68,7 @@ const Signup = () => {
               }
               className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
               required={formData.role === "student"}
+              disabled={isLoading}
             />
           </div>
         )}
@@ -82,11 +86,13 @@ const Signup = () => {
             }
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500 pr-12"
             required
+            disabled={isLoading}
           />
           <button
             type="button"
             onClick={() => setShowPassword(!showPassword)}
             className="absolute right-3 top-10 text-gray-500 hover:text-gray-700 focus:outline-none"
+            disabled={isLoading}
           >
             {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
           </button>
@@ -100,6 +106,7 @@ const Signup = () => {
             value={formData.role}
             onChange={(e) => setFormData({ ...formData, role: e.target.value })}
             className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+            disabled={isLoading}
           >
             <option value="student">Student</option>
             <option value="admin">Admin</option>
@@ -108,9 +115,14 @@ const Signup = () => {
 
         <button
           type="submit"
-          className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-3 px-6 rounded-lg transition-colors"
+          disabled={isLoading}
+          className={`w-full text-white font-medium py-3 px-6 rounded-lg transition-colors ${
+            isLoading
+              ? "bg-green-400 cursor-not-allowed"
+              : "bg-green-600 hover:bg-green-700"
+          }`}
         >
-          Create Account
+          {isLoading ? "Signing up..." : "Create Account"}
         </button>
       </form>
 

@@ -21,7 +21,6 @@ const DigitalProducts = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // ─── CACHE HELPERS ────────────────────────────────────────────────
   const getCachedProducts = () => {
     try {
       const cached = localStorage.getItem(CACHE_KEY);
@@ -46,10 +45,8 @@ const DigitalProducts = () => {
     } catch {}
   };
 
-  // ─── FETCH WITH CACHE ─────────────────────────────────────────────
   useEffect(() => {
     const fetchProducts = async () => {
-      // Try cache first
       const cached = getCachedProducts();
       if (cached) {
         setProducts(cached);
@@ -68,7 +65,7 @@ const DigitalProducts = () => {
           : res.data?.products || [];
 
         setProducts(data);
-        setCachedProducts(data); // cache it
+        setCachedProducts(data);
       } catch (err) {
         console.error("Failed to load products:", err);
         setError("Could not load digital products. Please try again later.");
@@ -80,14 +77,12 @@ const DigitalProducts = () => {
     fetchProducts();
   }, []);
 
-  // Memoized filtered products (small perf gain)
   const filteredProducts = useMemo(() => {
     return category
       ? products.filter((p) => p.category === category)
       : products;
   }, [products, category]);
 
-  // ─── SKELETON LOADER ──────────────────────────────────────────────
   const SkeletonProduct = () => (
     <div className="bg-white rounded-xl shadow-md border border-gray-200 overflow-hidden animate-pulse">
       <div className="w-full h-64 bg-gray-200"></div>
@@ -106,7 +101,7 @@ const DigitalProducts = () => {
           Digital Products
         </h1>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 md:gap-8">
-          {[...Array(8)].map((_, i) => (
+          {[...Array(9)].map((_, i) => (
             <SkeletonProduct key={i} />
           ))}
         </div>
