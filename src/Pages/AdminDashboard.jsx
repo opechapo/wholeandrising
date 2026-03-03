@@ -24,8 +24,8 @@ const AdminDashboard = () => {
     description: "",
     price: "",
     category: "ebooks",
-    file: null, // ← Main downloadable file (PDF)
-    featuredImage: null, // Thumbnail image
+    file: null,
+    featuredImage: null,
   });
   const [pricingModel, setPricingModel] = useState("paid");
   const [overview, setOverview] = useState("");
@@ -45,9 +45,12 @@ const AdminDashboard = () => {
   const [passwordMessage, setPasswordMessage] = useState(null);
   const [passwordError, setPasswordError] = useState(null);
   const [changingPassword, setChangingPassword] = useState(false);
+
+  // Mobile sidebar control
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
   const navigate = useNavigate();
 
-  // ReactQuill toolbar with alignment
   const quillModules = {
     toolbar: [
       [{ header: [1, 2, 3, false] }],
@@ -281,7 +284,7 @@ const AdminDashboard = () => {
       description: product.description || "",
       price: product.price?.toString() || "",
       category: product.category || "ebooks",
-      file: null, // reset file input (but show current URL)
+      file: null,
       featuredImage: null,
     });
     setPricingModel(product.pricingModel || "paid");
@@ -405,10 +408,55 @@ const AdminDashboard = () => {
     </div>
   );
 
+  const closeSidebar = () => setIsSidebarOpen(false);
+
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* LEFT SIDEBAR */}
-      <aside className="w-64 bg-gray-900 text-white flex flex-col h-screen fixed">
+    <div className="flex min-h-screen bg-gray-50 relative">
+      {/* Mobile Hamburger Button - RIGHT SIDE */}
+      <button
+        className="md:hidden fixed top-4 right-4 z-50 bg-gray-900 text-white p-3 rounded-lg shadow-lg focus:outline-none"
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        aria-label="Toggle menu"
+      >
+        {isSidebarOpen ? (
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M6 18L18 6M6 6l12 12"
+            />
+          </svg>
+        ) : (
+          <svg
+            className="w-6 h-6"
+            fill="none"
+            stroke="currentColor"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              strokeWidth={2}
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        )}
+      </button>
+
+      {/* Sidebar – slides in from RIGHT on mobile */}
+      <aside
+        className={`
+          fixed inset-y-0 right-0 z-40 w-64 bg-gray-900 text-white transform transition-transform duration-300 ease-in-out
+          ${isSidebarOpen ? "translate-x-0" : "translate-x-full"}
+          md:relative md:translate-x-0 md:left-0
+        `}
+      >
         <div className="p-6 border-b border-gray-800">
           <h2 className="text-2xl font-bold text-green-400">Admin Panel</h2>
         </div>
@@ -423,7 +471,10 @@ const AdminDashboard = () => {
           ].map((item) => (
             <button
               key={item.id}
-              onClick={() => setActiveSection(item.id)}
+              onClick={() => {
+                setActiveSection(item.id);
+                closeSidebar();
+              }}
               className={`w-full text-left px-5 py-3 rounded-lg transition-colors ${
                 activeSection === item.id
                   ? "bg-green-600 text-white"
@@ -449,19 +500,26 @@ const AdminDashboard = () => {
         </nav>
       </aside>
 
-      {/* MAIN CONTENT */}
-      <main className="flex-1 ml-64 p-8">
+      {/* Backdrop when sidebar is open on mobile */}
+      {isSidebarOpen && (
+        <div
+          className="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30"
+          onClick={closeSidebar}
+        />
+      )}
+
+      {/* Main Content */}
+      <main className="flex-1 md:ml-64 p-6 sm:p-8 pt-20 md:pt-8">
         {/* Add / Edit Product */}
         {activeSection === "add-product" && (
-          <section className="max-w-5xl mx-auto bg-white p-10 rounded-2xl shadow-lg">
-            <h2 className="text-3xl font-bold text-gray-800 mb-10 text-center">
+          <section className="max-w-5xl mx-auto bg-white p-8 sm:p-10 rounded-2xl shadow-lg">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-800 mb-8 sm:mb-10 text-center">
               {editingProduct
                 ? `Edit Product: ${editingProduct.title}`
                 : "Add New Digital Product"}
             </h2>
 
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {/* Title */}
+            <form onSubmit={handleSubmit} className="space-y-6 sm:space-y-8">
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
                   Title *
@@ -478,7 +536,6 @@ const AdminDashboard = () => {
                 />
               </div>
 
-              {/* Featured Image (Thumbnail) */}
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
                   Featured Image (Thumbnail)
@@ -513,7 +570,6 @@ const AdminDashboard = () => {
                 )}
               </div>
 
-              {/* Downloadable PDF File */}
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
                   Downloadable PDF File (students will download this)
@@ -551,7 +607,6 @@ const AdminDashboard = () => {
                 )}
               </div>
 
-              {/* Pricing */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className="block text-gray-700 font-medium mb-2">
@@ -593,7 +648,6 @@ const AdminDashboard = () => {
                 </div>
               </div>
 
-              {/* Description */}
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
                   Description *
@@ -610,7 +664,6 @@ const AdminDashboard = () => {
                 />
               </div>
 
-              {/* Category */}
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
                   Category *
@@ -635,14 +688,15 @@ const AdminDashboard = () => {
                 </select>
               </div>
 
-              {/* Curriculum */}
-              <div className="border-t pt-10">
-                <h3 className="text-2xl font-bold text-gray-800 mb-8">
+              <div className="border-t pt-8 sm:pt-10">
+                <h3 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6 sm:mb-8">
                   Curriculum Content
                 </h3>
 
-                <div className="bg-gray-50 p-8 rounded-2xl mb-10">
-                  <h4 className="text-xl font-semibold mb-6">Add New Topic</h4>
+                <div className="bg-gray-50 p-6 sm:p-8 rounded-2xl mb-8 sm:mb-10">
+                  <h4 className="text-lg sm:text-xl font-semibold mb-6">
+                    Add New Topic
+                  </h4>
                   <input
                     type="text"
                     placeholder="Topic Title *"
@@ -668,7 +722,7 @@ const AdminDashboard = () => {
                       onChange={setNewTopicContent}
                       theme="snow"
                       modules={quillModules}
-                      className="bg-white rounded-xl h-64"
+                      className="bg-white rounded-xl h-64 sm:h-72"
                       readOnly={isSubmitting}
                     />
                   </div>
@@ -688,8 +742,10 @@ const AdminDashboard = () => {
 
                 {curriculum.length > 0 && (
                   <div>
-                    <h4 className="text-xl font-semibold mb-6">Your Topics</h4>
-                    <div className="flex flex-wrap gap-4 mb-10">
+                    <h4 className="text-lg sm:text-xl font-semibold mb-6">
+                      Your Topics
+                    </h4>
+                    <div className="flex flex-wrap gap-3 sm:gap-4 mb-8 sm:mb-10">
                       {curriculum.map((topic, index) => (
                         <button
                           key={index}
@@ -699,7 +755,7 @@ const AdminDashboard = () => {
                             setEditingTopicContent(topic.content || "");
                           }}
                           disabled={isSubmitting}
-                          className={`px-6 py-3 rounded-full font-medium transition-all ${
+                          className={`px-5 sm:px-6 py-2.5 sm:py-3 rounded-full font-medium transition-all text-sm sm:text-base ${
                             currentTopicIndex === index
                               ? "bg-green-600 text-white shadow-md"
                               : "bg-gray-200 text-gray-800 hover:bg-gray-300"
@@ -711,8 +767,8 @@ const AdminDashboard = () => {
                     </div>
 
                     {currentTopicIndex !== -1 && (
-                      <div className="bg-gray-50 p-8 rounded-2xl">
-                        <h4 className="text-xl font-semibold mb-6">
+                      <div className="bg-gray-50 p-6 sm:p-8 rounded-2xl">
+                        <h4 className="text-lg sm:text-xl font-semibold mb-6">
                           Edit Content: {curriculum[currentTopicIndex].title}
                         </h4>
                         <ReactQuill
@@ -720,15 +776,15 @@ const AdminDashboard = () => {
                           onChange={setEditingTopicContent}
                           theme="snow"
                           modules={quillModules}
-                          className="bg-white rounded-xl mb-6 h-64"
+                          className="bg-white rounded-xl mb-6 h-64 sm:h-72"
                           readOnly={isSubmitting}
                         />
-                        <div className="flex gap-4">
+                        <div className="flex flex-col sm:flex-row gap-4">
                           <button
                             type="button"
                             onClick={handleSaveTopicContent}
                             disabled={isSubmitting}
-                            className={`bg-green-600 text-white font-medium py-3 px-8 rounded-xl transition-colors ${
+                            className={`bg-green-600 text-white font-medium py-3 px-8 rounded-xl transition-colors flex-1 ${
                               isSubmitting
                                 ? "opacity-50 cursor-not-allowed"
                                 : "hover:bg-green-700"
@@ -740,7 +796,7 @@ const AdminDashboard = () => {
                             type="button"
                             onClick={() => setCurrentTopicIndex(-1)}
                             disabled={isSubmitting}
-                            className={`bg-gray-400 text-white font-medium py-3 px-8 rounded-xl transition-colors ${
+                            className={`bg-gray-400 text-white font-medium py-3 px-8 rounded-xl transition-colors flex-1 ${
                               isSubmitting
                                 ? "opacity-50 cursor-not-allowed"
                                 : "hover:bg-gray-500"
@@ -755,7 +811,6 @@ const AdminDashboard = () => {
                 )}
               </div>
 
-              {/* Overview */}
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
                   Overview (attract & inform students)
@@ -765,17 +820,16 @@ const AdminDashboard = () => {
                   onChange={setOverview}
                   theme="snow"
                   modules={quillModules}
-                  className="bg-white rounded-xl h-64"
+                  className="bg-white rounded-xl h-64 sm:h-72"
                   readOnly={isSubmitting}
                 />
               </div>
 
-              {/* Submit */}
-              <div className="pt-8 flex gap-6">
+              <div className="pt-6 sm:pt-8 flex flex-col sm:flex-row gap-4 sm:gap-6">
                 <button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`flex-1 font-semibold text-lg py-4 px-10 rounded-xl transition-all shadow-md ${
+                  className={`flex-1 font-semibold text-base sm:text-lg py-3 sm:py-4 px-8 sm:px-10 rounded-xl transition-all shadow-md ${
                     isSubmitting
                       ? "bg-gray-400 cursor-not-allowed text-white"
                       : "bg-green-600 hover:bg-green-700 text-white hover:shadow-lg"
@@ -795,7 +849,7 @@ const AdminDashboard = () => {
                     type="button"
                     onClick={resetForm}
                     disabled={isSubmitting}
-                    className={`flex-1 font-medium py-4 px-10 rounded-xl transition-colors ${
+                    className={`flex-1 font-medium py-3 sm:py-4 px-8 sm:px-10 rounded-xl transition-colors ${
                       isSubmitting
                         ? "bg-gray-300 cursor-not-allowed text-gray-600"
                         : "bg-gray-500 hover:bg-gray-600 text-white"
@@ -809,42 +863,43 @@ const AdminDashboard = () => {
           </section>
         )}
 
-        {/* Products List */}
         {activeSection === "products-list" && (
           <section>
-            <h2 className="text-3xl font-bold text-gray-900 mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 sm:mb-10">
               Your Digital Products
             </h2>
 
             {loadingProducts ? (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                 {[...Array(6)].map((_, i) => (
                   <SkeletonCard key={i} />
                 ))}
               </div>
             ) : products.length === 0 ? (
-              <div className="bg-white p-12 rounded-2xl shadow-md text-center text-gray-600">
+              <div className="bg-white p-10 sm:p-12 rounded-2xl shadow-md text-center text-gray-600">
                 No products created yet.
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
                 {products.map((product) => (
                   <div
                     key={product._id}
-                    className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-xl transition-all"
+                    className="bg-white p-5 sm:p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-xl transition-all"
                   >
                     {product.featuredImageUrl ? (
                       <img
                         src={`${product.featuredImageUrl}?tr=w-600,h-900,q-80,f-webp`}
                         alt={product.title}
-                        className="w-full h-48 object-cover rounded-t-lg mb-4"
+                        className="w-full h-40 sm:h-48 object-cover rounded-t-lg mb-4"
                       />
                     ) : (
-                      <div className="w-full h-48 bg-gray-200 flex items-center justify-center text-gray-500 rounded-t-lg mb-4">
+                      <div className="w-full h-40 sm:h-48 bg-gray-200 flex items-center justify-center text-gray-500 rounded-t-lg mb-4">
                         No image
                       </div>
                     )}
-                    <h3 className="text-xl font-bold mb-2">{product.title}</h3>
+                    <h3 className="text-lg sm:text-xl font-bold mb-2">
+                      {product.title}
+                    </h3>
                     <p className="text-gray-600 mb-2 font-medium">
                       {product.pricingModel === "free"
                         ? "Free"
@@ -858,7 +913,7 @@ const AdminDashboard = () => {
                       {new Date(product.updatedAt).toLocaleDateString()}
                     </p>
                     {product.fileUrl && (
-                      <p className="text-sm text-green-600 mb-2">
+                      <p className="text-sm text-green-600 mb-3">
                         File attached:{" "}
                         <a
                           href={product.fileUrl}
@@ -872,29 +927,20 @@ const AdminDashboard = () => {
                     )}
                     <div className="grid grid-cols-3 gap-3 mt-4">
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleEdit(product);
-                        }}
-                        className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors text-sm"
+                        onClick={() => handleEdit(product)}
+                        className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-3 sm:px-4 rounded-lg transition-colors text-sm"
                       >
                         Edit
                       </button>
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleDelete(product._id);
-                        }}
-                        className="bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-lg transition-colors text-sm"
+                        onClick={() => handleDelete(product._id)}
+                        className="bg-red-600 hover:bg-red-700 text-white py-2 px-3 sm:px-4 rounded-lg transition-colors text-sm"
                       >
                         Delete
                       </button>
                       <button
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate("/admin/preview", { state: { product } });
-                        }}
-                        className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-4 rounded-lg transition-colors text-sm"
+                        onClick={() => handlePreview(product)}
+                        className="bg-purple-600 hover:bg-purple-700 text-white py-2 px-3 sm:px-4 rounded-lg transition-colors text-sm"
                       >
                         Preview
                       </button>
@@ -906,31 +952,30 @@ const AdminDashboard = () => {
           </section>
         )}
 
-        {/* Orders */}
         {activeSection === "orders" && (
           <section>
-            <h2 className="text-3xl font-bold text-gray-900 mb-10">
+            <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-8 sm:mb-10">
               Recent Orders (All Users)
             </h2>
 
             {loadingOrders ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
                 {[...Array(4)].map((_, i) => (
                   <SkeletonOrder key={i} />
                 ))}
               </div>
             ) : orders.length === 0 ? (
-              <div className="bg-white p-12 rounded-2xl shadow-md text-center text-gray-600">
+              <div className="bg-white p-10 sm:p-12 rounded-2xl shadow-md text-center text-gray-600">
                 No orders yet.
               </div>
             ) : (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
                 {orders.map((order) => (
                   <div
                     key={order._id}
-                    className="bg-white p-6 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow"
+                    className="bg-white p-6 sm:p-8 rounded-xl shadow-md border border-gray-200 hover:shadow-lg transition-shadow"
                   >
-                    <h3 className="text-xl font-bold mb-4">
+                    <h3 className="text-lg sm:text-xl font-bold mb-4">
                       {order.productId?.title || "Unknown Product"}
                     </h3>
                     <div className="space-y-2 text-gray-700">
@@ -979,36 +1024,35 @@ const AdminDashboard = () => {
           </section>
         )}
 
-        {/* Analytics */}
         {activeSection === "analytics" && (
-          <section className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
             {loadingAnalytics ? (
               <>
-                <div className="bg-white p-10 rounded-2xl shadow-lg border border-gray-100 animate-pulse">
+                <div className="bg-white p-8 sm:p-10 rounded-2xl shadow-lg border border-gray-100 animate-pulse">
                   <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
                   <div className="h-12 bg-gray-200 rounded w-1/2"></div>
                 </div>
-                <div className="bg-white p-10 rounded-2xl shadow-lg border border-gray-100 animate-pulse">
+                <div className="bg-white p-8 sm:p-10 rounded-2xl shadow-lg border border-gray-100 animate-pulse">
                   <div className="h-8 bg-gray-200 rounded w-3/4 mb-4"></div>
                   <div className="h-12 bg-gray-200 rounded w-1/2"></div>
                 </div>
               </>
             ) : (
               <>
-                <div className="bg-white p-10 rounded-2xl shadow-lg border border-gray-100">
-                  <h3 className="text-xl font-bold text-gray-800 mb-4">
+                <div className="bg-white p-8 sm:p-10 rounded-2xl shadow-lg border border-gray-100">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-4">
                     Total Orders
                   </h3>
-                  <p className="text-5xl font-extrabold text-green-600">
+                  <p className="text-4xl sm:text-5xl font-extrabold text-green-600">
                     {analytics.totalOrders || 0}
                   </p>
                 </div>
 
-                <div className="bg-white p-10 rounded-2xl shadow-lg border border-gray-100">
-                  <h3 className="text-xl font-bold text-gray-800 mb-4">
+                <div className="bg-white p-8 sm:p-10 rounded-2xl shadow-lg border border-gray-100">
+                  <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-4">
                     Total Enrollments
                   </h3>
-                  <p className="text-5xl font-extrabold text-green-600">
+                  <p className="text-4xl sm:text-5xl font-extrabold text-green-600">
                     {analytics.totalEnrollments || 0}
                   </p>
                 </div>
@@ -1017,14 +1061,16 @@ const AdminDashboard = () => {
           </section>
         )}
 
-        {/* Change Password */}
         {activeSection === "change-password" && (
-          <section className="max-w-lg mx-auto bg-white p-10 rounded-2xl shadow-lg border border-gray-100">
-            <h2 className="text-2xl font-bold text-gray-800 mb-8 text-center">
+          <section className="max-w-lg mx-auto bg-white p-8 sm:p-10 rounded-2xl shadow-lg border border-gray-100">
+            <h2 className="text-xl sm:text-2xl font-bold text-gray-800 mb-6 sm:mb-8 text-center">
               Change Admin Password
             </h2>
 
-            <form onSubmit={handlePasswordChange} className="space-y-6">
+            <form
+              onSubmit={handlePasswordChange}
+              className="space-y-5 sm:space-y-6"
+            >
               <div>
                 <label className="block text-gray-700 font-medium mb-2">
                   Current Password
@@ -1038,7 +1084,7 @@ const AdminDashboard = () => {
                       currentPassword: e.target.value,
                     })
                   }
-                  className="w-full px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-5 py-3 sm:py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                   autoComplete="current-password"
                   disabled={changingPassword}
@@ -1058,7 +1104,7 @@ const AdminDashboard = () => {
                       newPassword: e.target.value,
                     })
                   }
-                  className="w-full px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-5 py-3 sm:py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                   autoComplete="new-password"
                   disabled={changingPassword}
@@ -1078,7 +1124,7 @@ const AdminDashboard = () => {
                       confirmNewPassword: e.target.value,
                     })
                   }
-                  className="w-full px-5 py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
+                  className="w-full px-5 py-3 sm:py-4 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500"
                   required
                   autoComplete="new-password"
                   disabled={changingPassword}
@@ -1095,7 +1141,7 @@ const AdminDashboard = () => {
               <button
                 type="submit"
                 disabled={changingPassword}
-                className={`w-full py-4 px-8 rounded-xl font-semibold text-white transition-colors ${
+                className={`w-full py-3 sm:py-4 px-8 rounded-xl font-semibold text-white transition-colors ${
                   changingPassword
                     ? "bg-gray-400 cursor-not-allowed"
                     : "bg-green-600 hover:bg-green-700"
